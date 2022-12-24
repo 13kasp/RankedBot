@@ -1,0 +1,160 @@
+#============================== GENERAL
+# THIS IS PRECONFIGURED FOR MY TEST SERVER, YOU CAN CHANGE ANYTHING YOU WANT
+
+# Bot's token
+token:
+
+# Discord server's ID
+server-id: 947177745690034308
+
+# Bot's status (ONLINE, IDLE, DO_NOT_DISTURB, INVISIBLE)
+status: ONLINE
+
+# Your server's name
+server-name: RBW
+
+# Bot's prefix
+prefix: =
+
+# Alerts channel
+alerts-channel: 947177745690034311
+
+# Elo prefix formatting, use %elo% for player elo
+elo-formatting: "[%elo%] "
+
+#============================== REGISTERING
+
+# Registered role ID
+registered-role: 955865900916043797
+
+# Starting elo
+starting-elo: 0
+
+#============================== EMBEDS
+
+# Embed colors (you MUST use RGB values separated by ","):
+default: 35,35,35
+success: 116,227,121
+error: 227,93,93
+
+# Embed footers (leave blank to disable). Use {%version} to write bot's version, use {%name} to write your server's name that you set above
+footer: "%name% | v%version%"
+
+#============================== LOGGING
+
+# Log every command players do?
+log-commands: true
+
+#============================== BANNING
+
+banned-role: 956947112774475816
+
+# Channel where the bans are announced, leave blank to disable announcing bans
+ban-channel: 947177745690034311
+
+# Ban time for strikes (in hours)
+strike1: 0
+strike2: 2
+strike3: 12
+strike4: 24
+# 5+
+strike5: 48
+
+#============================== SCREENSHARING
+
+# How many images do people need to attach for proof when using the command?
+ss-attachments: 1
+ssreq-channel: 947177745690034311
+frozen-role: 954824905826897980
+# How many mins will ppl be automatically unfrozen in after getting ss requested
+time-till-unfrozen: 10
+
+# SSERS Roles IDS (you can add multiple roles separated by ",")
+ss-roles: 947231507343364097,993812234973233283
+
+#============================== GAMES
+
+game-channels-category: 949419943995244566
+game-vcs-category: 949419943995244566
+
+# use %number% to get game number
+# use %mode% to get game mode (4v4 / 3v3 etc)
+game-channel-names: "Game%number%"
+
+# use %number% to get game number
+# use %mode% to get game mode (4v4 / 3v3 etc)
+# use %team% to get the team number
+game-vc-names: "Game#%number% | T%team%"
+
+# Games announcing channel (leave blank to disable)
+games-announcing: 994537829520654426
+
+# Scored games announcing channel (leave blank to disable)
+scored-announcing: 995311293764472914
+
+# Display text helping people to invite eachother to party (leave blank to disable)
+party-invite-cmd: "/p invite"
+
+# Game channel deleting time after its scored (in seconds)
+game-deleting-time: 300
+
+# How many screenshots do players have to attach when using =submit (for proof)
+submitting-attachments: 1
+
+# Role to ping when game gets submitted
+scorer-role: 947231507343364097
+
+#============================== STATS IMAGE(S)
+
+name-pixels: 35,52
+
+strikes-pixels: 41948,86114654
+scored-pixels: 169,292
+role-pixels: 53,367
+
+elo-pixels: 735,129
+mvp-pixels: 744,163
+games-pixels: 780,198
+wlr-pixels: 745,232
+
+wins-pixels: 751,393
+winstreak-pixels: 833,428
+losses-pixels: 799,463
+losestreak-pixels: 862,497
+
+skin-pixels: 500,500
+
+#============================== TEAMS SORTING SYSTEM
+
+# Sorting is done like this by default:
+
+# (Player elo / 100 * sort-by-elo) + (Player wins / 100 * sort-by-wins) + (Player WS / 100 * sort-by-ws) +
+#  + (Player highest WS / 100 * sort-by-highestws) + (Player MVP / 100 * sort-by-mvp) + (Player WLR / 100 * sort-by-wlr)
+
+# number that will the bot get from this ^ will be used to sort teams
+
+# All the numbers below must be exactly 100 when added up
+# 1st player will have a lower number than 2nd to make it more fair (since 1st can pick first)
+# If you do not understand this system you can dm me, and I'll give you another values to paste but this preset makes things more fair
+
+sort-by-elo: 25
+sort-by-peakelo: 0
+sort-by-wins: 10
+sort-by-ws: 5
+sort-by-highestws: 5
+sort-by-losses: 0
+sort-by-ls: 0
+sort-by-highestls: 0
+sort-by-games: 0
+sort-by-mvp: 10
+sort-by-wlr: 35
+
+#============================== IN-GAME BOT INTEGRATION
+
+# ONLY USE THIS IF U KNOW WHAT YOU'RE DOING
+
+# Bots communication channel
+bot-communication: 947177745690034311
+
+# Linking with in-game instead of normally registering/renaming
+bot-linking: true

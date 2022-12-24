@@ -1,0 +1,78 @@
+# Put Role IDS here (you can put multiple IDS separated by ",")
+# Example: 955865900916043797,955865900916873792,95586590078873791
+# write "everyone" instead of an id to make it so everyone can use the command
+# leave blank to disable the command
+
+# Commands:
+help: everyone
+
+register: everyone
+rename: everyone
+fix: everyone
+stats: everyone
+ss: everyone
+lb: everyone
+
+pick: everyone
+queue: everyone
+queuestats: everyone
+void: everyone
+gameinfo: everyone
+submit: everyone
+
+baninfo: everyone
+bans: everyone
+
+ranks: everyone
+
+maps: everyone
+
+theme: everyone
+
+# Important commands:
+
+# ====== RANKS
+addrank: everyone
+delrank: everyone
+getrankfile: everyone
+setrankfile: everyone
+
+# ====== MAPS
+addmap: everyone
+delmap: everyone
+getmapfile: everyone
+setmapfile: everyone
+
+# ====== QUEUES
+addqueue: everyone
+delqueue: everyone
+getqueuefile: everyone
+setqueuefile: everyone
+
+# ====== BANNING
+ban: everyone
+unban: everyone
+strike: everyone
+
+# ====== PLAYERS
+getplayerfile: everyone
+setplayerfile: everyone
+wipe: everyone
+forceregister: everyone
+forcerename: everyone
+modify: everyone
+
+# ====== SCORING
+win: everyone
+lose: everyone
+score: everyone
+undogame: everyone
+
+# ====== THEMES
+addtheme: everyone
+deltheme: everyone
+givetheme: everyone
+removetheme: everyone
+
+# ====== BOT
+savedata: everyone
