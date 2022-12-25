@@ -1,2 +1,7 @@
-package com.kasp.rankedbot;public enum PickingMode {
+package com.kasp.rankedbot;
+
+public enum PickingMode {
+
+    AUTOMATIC,
+    CAPTAINS;
 }

@@ -1,6 +1,6 @@
-package com.kasp.rankedbot.classes.cache;
+package com.kasp.rankedbot.instance.cache;
 
-import com.kasp.rankedbot.classes.player.Player;
+import com.kasp.rankedbot.instance.Player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class PlayerCache {
     public static void addPlayer(Player player) {
         players.put(player.getID(), player);
 
-        System.out.println("Player " + player.getIgn() + " (" + player.getID() + ")" + " has been added to cache");
+        System.out.println("Player " + player.getIgn() + " (" + player.getID() + ")" + " has been loaded into memory");
     }
 
     public static void removePlayer(Player player) {
@@ -27,9 +27,11 @@ public class PlayerCache {
         return players.containsKey(ID);
     }
 
-    public static void initializePlayer(String ID, Player player) {
+    public static Player initializePlayer(String ID, Player player) {
         if (!containsPlayer(ID))
             addPlayer(player);
+
+        return getPlayer(ID);
     }
 
     public static Map<String, Player> getPlayers() {

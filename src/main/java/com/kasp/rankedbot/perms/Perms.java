@@ -1,6 +1,6 @@
-package com.kasp.rbw3.perms;
+package com.kasp.rankedbot.perms;
 
-import com.kasp.rbw3.Main;
+import com.kasp.rankedbot.RankedBot;
 import org.apache.commons.io.IOUtils;
 import org.yaml.snakeyaml.Yaml;
 
@@ -15,15 +15,15 @@ public class Perms {
 
     public static void loadPerms() throws FileNotFoundException {
         String filename = "permissions.yml";
-        ClassLoader classLoader = Main.class.getClassLoader();
+        ClassLoader classLoader = RankedBot.class.getClassLoader();
 
         try (InputStream inputStream = classLoader.getResourceAsStream(filename)) {
             String result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 
-            File file = new File("RBW/" + filename);
+            File file = new File("RankedBot/" + filename);
             if (!file.exists()) {
                 file.createNewFile();
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/" + filename));
+                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/" + filename));
                 bw.write(result);
                 bw.close();
             }
@@ -32,7 +32,7 @@ public class Perms {
         }
 
         Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(new FileInputStream("RBW/permissions.yml"));
+        Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/permissions.yml"));
         for (String s : data.keySet()) {
             permsData.put(s, data.get(s).toString());
         }

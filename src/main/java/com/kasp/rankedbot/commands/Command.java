@@ -1,13 +1,11 @@
-package com.kasp.rbw3.commands;
+package com.kasp.rankedbot.commands;
 
-import com.kasp.rbw3.perms.Perms;
+import com.kasp.rankedbot.CommandSubsystem;
+import com.kasp.rankedbot.perms.Perms;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Command{
 
@@ -15,9 +13,9 @@ public class Command{
     private String usage;
     private String[] aliases;
     private String description;
-    private String subsystem;
+    private CommandSubsystem subsystem;
 
-    public Command (String command, String usage, String[] aliases, String description, String subsystem) {
+    public Command (String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         System.out.println(command + " command successfully loaded");
         this.command = command;
         this.usage = usage;
@@ -30,7 +28,7 @@ public class Command{
         System.out.println("Something went wrong...");
     }
 
-    public String getCommad() {
+    public String getCommand() {
         return command;
     }
 
@@ -50,7 +48,7 @@ public class Command{
         return Perms.getPerm(command).split(",");
     }
 
-    public String getSubsystem() {
+    public CommandSubsystem getSubsystem() {
         return subsystem;
     }
 }

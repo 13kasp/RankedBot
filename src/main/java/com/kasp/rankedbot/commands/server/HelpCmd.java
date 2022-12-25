@@ -1,10 +1,12 @@
-package com.kasp.rbw3.commands.serverCmds;
+package com.kasp.rankedbot.commands.server;
 
-import com.kasp.rbw3.commands.Command;
-import com.kasp.rbw3.commands.CommandManager;
-import com.kasp.rbw3.config.Config;
-import com.kasp.rbw3.classes.embed.Embed;
-import com.kasp.rbw3.messages.Msg;
+import com.kasp.rankedbot.CommandSubsystem;
+import com.kasp.rankedbot.EmbedType;
+import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.commands.CommandManager;
+import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,34 +15,26 @@ import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.ArrayList;
 
-public class Help extends Command {
+public class HelpCmd extends Command {
 
-    public Help(String command, String usage, String[] aliases, String description, String subsystem) {
+    public HelpCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         super(command, usage, aliases, description, subsystem);
     }
 
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length > 2) {
-            msg.replyEmbeds(new Embed("error", "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1).build()).queue();
+            msg.replyEmbeds(new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1).build()).queue();
             return;
         }
 
         ArrayList<Command> commands = new ArrayList<>(CommandManager.getAllCommands());
 
         if (args.length == 1) {
-            Embed reply = new Embed("default", "Help Subsystems", "Use `=help <subsystem>` to view the commands of a sub system", 1);
+            Embed reply = new Embed(EmbedType.DEFAULT, "Help Subsystems", "Use `=help <subsystem>` to view the commands of a sub system", 1);
 
-            ArrayList<String> subsystems = new ArrayList<>();
-
-            for (Command cmd : commands) {
-                if (!subsystems.contains(cmd.getSubsystem())) {
-                    subsystems.add(cmd.getSubsystem());
-                }
-            }
-
-            for (String s : subsystems) {
-                reply.addField("• " + s + " sub-system", "use `=help " + s + "`", false);
+            for (CommandSubsystem s : CommandSubsystem.values()) {
+                reply.addField("• " + s.toString().toLowerCase() + " sub-system", "use `=help " + s.toString().toLowerCase() + "`", false);
             }
 
             msg.replyEmbeds(reply.build()).queue();
@@ -51,12 +45,12 @@ public class Help extends Command {
             String aliases = "";
             String permissions = "";
 
-            String subsystem = args[1];
+            CommandSubsystem subsystem = CommandSubsystem.valueOf(args[1].toUpperCase());
 
             ArrayList<Command> subsystemCmds = new ArrayList<>();
 
             for (Command cmd : commands) {
-                if (cmd.getSubsystem().equalsIgnoreCase(subsystem))
+                if (cmd.getSubsystem() == subsystem)
                     subsystemCmds.add(cmd);
             }
 
@@ -64,7 +58,7 @@ public class Help extends Command {
 
             for (int j = 0; j < Math.ceil(subsystemCmds.size()); j+=3) {
 
-                Embed reply = new Embed("default", "All commands in sub-system: " + subsystem, "", (int) Math.ceil(subsystemCmds.size() / 3.0));
+                Embed reply = new Embed(EmbedType.DEFAULT, "All commands in sub-system: " + subsystem, "", (int) Math.ceil(subsystemCmds.size() / 3.0));
 
                 for (int i = 0; i < 3; i++) {
                     if (i + j < subsystemCmds.size()) {
@@ -79,7 +73,7 @@ public class Help extends Command {
                                 permissions += guild.getRoleById(s).getAsMention();
                         }
 
-                        reply.addField("• " + subsystemCmds.get(i + j).getCommad(), subsystemCmds.get(i + j).getDescription() +
+                        reply.addField("• " + subsystemCmds.get(i + j).getCommand(), subsystemCmds.get(i + j).getDescription() +
                                 "\n> Usage: `" + Config.getValue("prefix") + subsystemCmds.get(i + j).getUsage() +
                                 "`\n> Aliases: " + aliases +
                                 "\n> Permissions: " + permissions + "\n", false);

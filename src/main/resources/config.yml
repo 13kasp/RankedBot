@@ -4,9 +4,6 @@
 # Bot's token
 token:
 
-# Discord server's ID
-server-id: 947177745690034308
-
 # Bot's status (ONLINE, IDLE, DO_NOT_DISTURB, INVISIBLE)
 status: ONLINE
 
@@ -123,31 +120,6 @@ losses-pixels: 799,463
 losestreak-pixels: 862,497
 
 skin-pixels: 500,500
-
-#============================== TEAMS SORTING SYSTEM
-
-# Sorting is done like this by default:
-
-# (Player elo / 100 * sort-by-elo) + (Player wins / 100 * sort-by-wins) + (Player WS / 100 * sort-by-ws) +
-#  + (Player highest WS / 100 * sort-by-highestws) + (Player MVP / 100 * sort-by-mvp) + (Player WLR / 100 * sort-by-wlr)
-
-# number that will the bot get from this ^ will be used to sort teams
-
-# All the numbers below must be exactly 100 when added up
-# 1st player will have a lower number than 2nd to make it more fair (since 1st can pick first)
-# If you do not understand this system you can dm me, and I'll give you another values to paste but this preset makes things more fair
-
-sort-by-elo: 25
-sort-by-peakelo: 0
-sort-by-wins: 10
-sort-by-ws: 5
-sort-by-highestws: 5
-sort-by-losses: 0
-sort-by-ls: 0
-sort-by-highestls: 0
-sort-by-games: 0
-sort-by-mvp: 10
-sort-by-wlr: 35
 
 #============================== IN-GAME BOT INTEGRATION
 

@@ -1,10 +1,10 @@
-package com.kasp.rankedbot.classes.player;
+package com.kasp.rankedbot.instance;
 
 import com.kasp.rankedbot.RankedBot;
-import com.kasp.rankedbot.classes.cache.RanksCache;
-import com.kasp.rankedbot.classes.cache.ThemesCache;
-import com.kasp.rankedbot.classes.rank.Rank;
-import com.kasp.rankedbot.classes.theme.Theme;
+import com.kasp.rankedbot.Statistic;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
+import com.kasp.rankedbot.instance.cache.RanksCache;
+import com.kasp.rankedbot.instance.cache.ThemesCache;
 import com.kasp.rankedbot.config.Config;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,8 +12,7 @@ import net.dv8tion.jda.api.entities.Role;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 public class Player {
 
@@ -42,6 +41,11 @@ public class Player {
 
     public Player(String ID, String ign) {
         this.ID = ID;
+
+        if (PlayerCache.containsPlayer(ID)) {
+            PlayerCache.initializePlayer(ID, this);
+            return;
+        }
 
         Yaml yaml = new Yaml();
         Map<String, Object> data = null;
@@ -84,6 +88,8 @@ public class Player {
         }
 
         this.isBanned = Boolean.parseBoolean(data.get("is-banned").toString());
+
+        PlayerCache.initializePlayer(ID, this);
     }
 
     public void fix() {
@@ -106,6 +112,33 @@ public class Player {
 
         guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
         member.modifyNickname(Config.getValue("elo-formatting").replaceAll("%elo%", elo + "") + ign).queue();
+    }
+
+    public void wipe() {
+        elo = Integer.parseInt(Config.getValue("starting-elo"));
+        peakElo = Integer.parseInt(Config.getValue("starting-elo"));
+        wins = 0;
+        losses = 0;
+        winStreak = 0;
+        lossStreak = 0;
+        highestWS = 0;
+        highestLS = 0;
+        mvp = 0;
+        kills = 0;
+        deaths = 0;
+    }
+
+    public int getPlacement(Statistic statistic) {
+
+        List<String> lb = Leaderboard.getLeaderboard(statistic);
+
+        for (String s : lb) {
+            if (s.startsWith(ID)) {
+                return lb.indexOf(s)+1;
+            }
+        }
+
+        return 0;
     }
 
     public Rank getRank() {

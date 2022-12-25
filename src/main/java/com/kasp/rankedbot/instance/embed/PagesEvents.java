@@ -1,4 +1,4 @@
-package com.kasp.rankedbot.classes.embed;
+package com.kasp.rankedbot.instance.embed;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -10,7 +10,7 @@ public class PagesEvents extends ListenerAdapter {
 
         if (event.getButton().getId().startsWith("rankedbot-page-")) {
             Message msg = event.getMessage();
-            int number = Integer.parseInt(event.getButton().getId().replaceAll("rankedbot-page-", ""));
+            int number = Integer.parseInt(event.getButton().getId().replace("rankedbot-page-", ""));
 
             if (number <= -1) {
                 event.reply("you're already on the first page").setEphemeral(true).queue();

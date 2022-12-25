@@ -1,5 +1,6 @@
-package com.kasp.rankedbot.classes.embed;
+package com.kasp.rankedbot.instance.embed;
 
+import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.config.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,7 +19,7 @@ public class Embed {
 
     private int pages;
     private int currentPage = 0;
-    private String type;
+    private EmbedType type;
     private String title;
     private String description;
     private String thumbnailURL;
@@ -28,7 +29,7 @@ public class Embed {
 
     EmbedBuilder eb = new EmbedBuilder();
 
-    public Embed(String type, String title, String description, int pages) {
+    public Embed(EmbedType type, String title, String description, int pages) {
         this.type = type;
         this.title = title;
         this.description = description;
@@ -38,8 +39,8 @@ public class Embed {
         String[] s = Config.getValue("success").split(",");
         String[] e = Config.getValue("error").split(",");
 
-        if (type.equalsIgnoreCase("success")) {eb.setColor(new Color(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2])));}
-        else if (type.equalsIgnoreCase("error")) {eb.setColor(new Color(Integer.parseInt(e[0]), Integer.parseInt(e[1]), Integer.parseInt(e[2])));}
+        if (type == EmbedType.SUCCESS) {eb.setColor(new Color(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2])));}
+        else if (type == EmbedType.ERROR) {eb.setColor(new Color(Integer.parseInt(e[0]), Integer.parseInt(e[1]), Integer.parseInt(e[2])));}
         else {eb.setColor(new Color(Integer.parseInt(d[0]), Integer.parseInt(d[1]), Integer.parseInt(d[2])));}
 
         this.footer = Config.getValue("footer").replaceAll("%name%", Config.getValue("server-name")).replaceAll("%version%", RankedBot.version);
@@ -120,11 +121,11 @@ public class Embed {
         this.currentPage = currentPage;
     }
 
-    public String getType() {
+    public EmbedType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(EmbedType type) {
         this.type = type;
     }
 

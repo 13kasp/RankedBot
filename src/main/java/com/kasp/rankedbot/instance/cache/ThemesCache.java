@@ -1,6 +1,6 @@
-package com.kasp.rankedbot.classes.cache;
+package com.kasp.rankedbot.instance.cache;
 
-import com.kasp.rankedbot.classes.theme.Theme;
+import com.kasp.rankedbot.instance.Theme;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class ThemesCache {
     public static void addTheme(Theme theme) {
         themes.put(theme.getName(), theme);
 
-        System.out.println("Theme " + theme.getName() + " has been added to cache");
+        System.out.println("Theme " + theme.getName() + " has been loaded into memory");
     }
 
     public static void removeTheme(Theme theme) {
@@ -27,8 +27,8 @@ public class ThemesCache {
         return themes.containsKey(name);
     }
 
-    public static void initializeTheme(String ID, Theme theme) {
-        if (!containsTheme(ID))
+    public static void initializeTheme(String name, Theme theme) {
+        if (!containsTheme(name))
             addTheme(theme);
     }
 

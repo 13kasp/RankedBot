@@ -1,8 +1,11 @@
 package com.kasp.rankedbot;
 
-import com.kasp.rankedbot.classes.embed.PagesEvents;
 import com.kasp.rankedbot.commands.CommandManager;
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.instance.*;
+import com.kasp.rankedbot.instance.embed.PagesEvents;
+import com.kasp.rankedbot.listener.QueueJoin;
+import com.kasp.rankedbot.listener.ServerJoin;
 import com.kasp.rankedbot.messages.Msg;
 import com.kasp.rankedbot.perms.Perms;
 import net.dv8tion.jda.api.JDA;
@@ -15,16 +18,15 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Map;
 
-public class Main {
+public class RankedBot {
 
     public static JDA jda;
+    public static ServerStats serverStats;
 
-    public static String version = "3.0.0";
+    public static String version = "1.0.0";
     public static Guild guild;
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -32,9 +34,7 @@ public class Main {
         new File("RankedBot/players").mkdirs();
         new File("RankedBot/ranks").mkdirs();
         new File("RankedBot/maps").mkdirs();
-        new File("RankedBot/bans").mkdirs();
         new File("RankedBot/queues").mkdirs();
-        new File("RankedBot/games").mkdirs();
         new File("RankedBot/fonts").mkdirs();
         new File("RankedBot/themes").mkdirs();
 
@@ -50,14 +50,58 @@ public class Main {
         jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
         jdaBuilder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         jdaBuilder.enableIntents(GatewayIntent.GUILD_MESSAGES);
-        jdaBuilder.addEventListeners(new CommandManager(), new PagesEvents());
+        jdaBuilder.addEventListeners(new CommandManager(), new PagesEvents(), new QueueJoin(), new ServerJoin());
         try {
             jda = jdaBuilder.build();
         } catch (LoginException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         guild = jda.getGuilds().get(0);
+
+        if (!new File("RankedBot/serverstats.yml").exists()) {
+            try {
+                BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/serverstats.yml"));
+
+                bw.write("games-played: 0");
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Map<String, Object> serverStatsData = null;
+        try {
+            serverStatsData = yaml.load(new FileInputStream("RankedBot/serverstats.yml"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        serverStats = new ServerStats(Integer.parseInt(serverStatsData.get("games-played").toString()));
+
+        if (new File("RankedBot/ranks").listFiles().length > 0) {
+            for (File f : new File("RankedBot/ranks").listFiles()) {
+                new Rank(f.getName().replaceAll(".yml", ""));
+            }
+        }
+
+        if (new File("RankedBot/maps").listFiles().length > 0) {
+            for (File f : new File("RankedBot/maps").listFiles()) {
+                new GameMap(f.getName().replaceAll(".yml", ""));
+            }
+        }
+
+        if (new File("RankedBot/queues").listFiles().length > 0) {
+            for (File f : new File("RankedBot/queues").listFiles()) {
+                new Queue(f.getName().replaceAll(".yml", ""));
+            }
+        }
+
+        if (new File("RankedBot/themes").listFiles().length > 0) {
+            for (File f : new File("RankedBot/themes").listFiles()) {
+                new Theme(f.getName().replaceAll(".yml", ""));
+            }
+        }
 
         System.out.println("RankedBot has been successfully enabled!");
         System.out.println("NOTE: this bot can only be used on 1 server, otherwise it'll break");

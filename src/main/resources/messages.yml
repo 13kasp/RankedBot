@@ -12,7 +12,6 @@ invalid-game: "This game does not exist (wrong number?)"
 not-game-channel: "You can use this command only in game channels"
 
 # =register
-registered-not-set: "The registered role isn't set in the config.yml"
 already-registered: "You are already registered"
 ign-too-long: "Max character limit when registering is 16 characters"
 successfully-registered: "You have successfully registered, have fun playing!"
@@ -92,6 +91,9 @@ no-bans-found: "No bans found"
 
 # =wipe
 successfully-wiped: "You have successfully wiped the player's stats"
+
+# =forceregister
+player-already-registered: "The player you're trying to register is already registered"
 
 # =forcerename
 player-not-registered: "The player you're trying to rename is not registered (=forceregister)"

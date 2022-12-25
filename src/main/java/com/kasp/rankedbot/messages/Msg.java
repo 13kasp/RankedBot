@@ -1,6 +1,6 @@
-package com.kasp.rbw3.messages;
+package com.kasp.rankedbot.messages;
 
-import com.kasp.rbw3.Main;
+import com.kasp.rankedbot.RankedBot;
 import org.apache.commons.io.IOUtils;
 import org.yaml.snakeyaml.Yaml;
 
@@ -15,15 +15,15 @@ public class Msg {
 
     public static void loadMsg() throws FileNotFoundException {
         String filename = "messages.yml";
-        ClassLoader classLoader = Main.class.getClassLoader();
+        ClassLoader classLoader = RankedBot.class.getClassLoader();
 
         try (InputStream inputStream = classLoader.getResourceAsStream(filename)) {
             String result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 
-            File file = new File("RBW/" + filename);
+            File file = new File("RankedBot/" + filename);
             if (!file.exists()) {
                 file.createNewFile();
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/" + filename));
+                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/" + filename));
                 bw.write(result);
                 bw.close();
             }
@@ -32,7 +32,7 @@ public class Msg {
         }
 
         Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(new FileInputStream("RBW/messages.yml"));
+        Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/messages.yml"));
         for (String s : data.keySet()) {
             msgData.put(s, data.get(s).toString());
         }
