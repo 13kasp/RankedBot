@@ -16,6 +16,9 @@ import com.kasp.rankedbot.commands.rank.RanksCmd;
 import com.kasp.rankedbot.commands.server.HelpCmd;
 import com.kasp.rankedbot.commands.server.ReloadConfigCmd;
 import com.kasp.rankedbot.commands.server.SaveDataCmd;
+import com.kasp.rankedbot.commands.theme.GiveThemeCmd;
+import com.kasp.rankedbot.commands.theme.RemoveThemeCmd;
+import com.kasp.rankedbot.commands.theme.ThemeCmd;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.embed.Embed;
@@ -51,10 +54,15 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new ScreenshareCmd("screenshare", "screenshare <ID/mention> <reason>", new String[]{"ss"}, "Screenshare a player", CommandSubsystem.PLAYER));
 
         commands.add(new QueueCmd("queue", "queue", new String[]{"q"}, "View your game's queue", CommandSubsystem.GAME));
-        commands.add(new QueueStats("queuestats", "queuestats", new String[]{"qs"}, "View your game's queue stats", CommandSubsystem.GAME));
+        commands.add(new QueueStatsCmd("queuestats", "queuestats", new String[]{"qs"}, "View your game's queue stats", CommandSubsystem.GAME));
         commands.add(new GameInfoCmd("gameinfo", "gameinfo <number>", new String[]{"gi"}, "View info about a game", CommandSubsystem.GAME));
         commands.add(new PickCmd("pick", "pick <ID/mention>", new String[]{"p"}, "Pick a player in your game (if you're a captain)", CommandSubsystem.GAME));
         commands.add(new VoidCmd("void", "void", new String[]{"cleargame", "clear", "cg"}, "Cancel a game if you can't play it anymore", CommandSubsystem.GAME));
+        commands.add(new SubmitCmd("submit", "submit", new String[]{}, "Submit a game for scoring", CommandSubsystem.GAME));
+        commands.add(new ScoreCmd("score", "score <number> <team> <mvp ID/mention/\"none\">", new String[]{}, "Score a game", CommandSubsystem.GAME));
+        commands.add(new UndoGameCmd("undogame", "undogame <number>", new String[]{}, "Undo a scored game", CommandSubsystem.GAME));
+        commands.add(new WinCmd("win", "win <ID/mention>", new String[]{}, "Give specified player +1 win and elo (depends on the rank). This command should be used ONLY when '=score' doesn't work or for testing purposes", CommandSubsystem.GAME));
+        commands.add(new LoseCmd("lose", "lose <ID/mention>", new String[]{}, "Give specified player +1 loss and -elo (depends on the rank). This command should be used ONLY when '=score' doesn't work or for testing purposes", CommandSubsystem.GAME));
 
         commands.add(new AddQueueCmd("addqueue", "addqueue <vc ID> <playersEachTeam> <pickingMode (AUTOMATIC/CAPTAINS)> <casual (true/false)>", new String[]{"addq"}, "Add a ranked/casual queue", CommandSubsystem.QUEUE));
         commands.add(new DeleteQueueCmd("deletequeue", "deletequeue <vc ID>", new String[]{"delq", "delqueue"}, "Delete a ranked/casual queue", CommandSubsystem.QUEUE));
@@ -67,6 +75,10 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new AddMapCmd("addmap", "addmap <name> <height> <team1> <team2>", new String[]{"addm"}, "Add an in-game map", CommandSubsystem.MAP));
         commands.add(new DeleteMapCmd("deletemap", "deletemap <name>", new String[]{"delm", "delmap"}, "Delete an in-game map", CommandSubsystem.MAP));
         commands.add(new MapsCmd("maps", "maps", new String[]{}, "View all maps and info about them", CommandSubsystem.MAP));
+
+        commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "give specified player access to a theme", CommandSubsystem.THEME));
+        commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "remove specified player's access to a theme", CommandSubsystem.THEME));
+        commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "select a theme or use \"list\" to view all themes", CommandSubsystem.THEME));
     }
 
     @Override

@@ -129,3 +129,12 @@ theme-already-exists: "This theme already exists (same name)"
 # =deltheme, =theme
 theme-doesnt-exist: "This theme doesnt exist (wrong name?)"
 theme-deleted: "The theme has been successfully deleted"
+
+# =givetheme
+already-has-theme: "This player already has the theme"
+
+# =removetheme
+doesnt-have-theme: "This player doesn't have the theme"
+
+# =theme
+theme-access-denied: "You don't own this theme"

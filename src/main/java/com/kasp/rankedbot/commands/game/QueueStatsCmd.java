@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class QueueStats extends Command {
-    public QueueStats(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
+public class QueueStatsCmd extends Command {
+    public QueueStatsCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         super(command, usage, aliases, description, subsystem);
     }
 
@@ -51,7 +51,7 @@ public class QueueStats extends Command {
                 templosses = p.getLosses();
 
             double wlr = p.getWins() / templosses;
-            t1 += "• <@" + p.getID() + "> — `" + p.getWins() + "W/" + p.getLosses() + "L` `(" + wlr + "WLR)`\n";
+            t2 += "• <@" + p.getID() + "> — `" + p.getWins() + "W/" + p.getLosses() + "L` `(" + wlr + "WLR)`\n";
         }
 
         String remaining = "";
@@ -61,7 +61,7 @@ public class QueueStats extends Command {
                 templosses = p.getLosses();
 
             double wlr = p.getWins() / templosses;
-            t1 += "• <@" + p.getID() + "> — `" + p.getWins() + "W/" + p.getLosses() + "L` `(" + wlr + "WLR)`\n";
+            remaining += "• <@" + p.getID() + "> — `" + p.getWins() + "W/" + p.getLosses() + "L` `(" + wlr + "WLR)`\n";
         }
 
         Embed embed = new Embed(EmbedType.DEFAULT, "Game`#" + game.getNumber() + "` QueueStats", "", 1);

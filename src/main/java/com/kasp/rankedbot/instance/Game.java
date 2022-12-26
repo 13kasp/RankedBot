@@ -15,10 +15,7 @@ import net.dv8tion.jda.api.entities.*;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Game {
 
@@ -53,6 +50,10 @@ public class Game {
     private GameMap map;
     private Player mvp;
     private Member scoredBy; // this acts as voidedBy if game was voided
+
+    // IF THE GAME WAS SCORED
+
+    private HashMap<Player, Integer> eloGain; // used for =undogame
 
     public Game(List<Player> players, Queue queue) {
         guild = RankedBot.getGuild();
@@ -131,17 +132,32 @@ public class Game {
         this.queue = QueuesCache.getQueue(data.get("queue").toString());
 
         if (state != GameState.STARTING) {
-            for (int i = 0; i < queue.getPlayers().size(); i++) {
-                team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString()));
-            }
+            if (state != GameState.SCORED) {
+                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                    team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString()));
+                }
 
-            for (int i = 0; i < queue.getPlayers().size(); i++) {
-                team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString()));
+                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                    team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString()));
+                }
+            }
+            else {
+                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                    team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString().split("=")[0]));
+                    eloGain.put(team1.get(i), Integer.parseInt(data.get("team1-" + i).toString().split("=")[1]));
+                }
+
+                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                    team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString().split("=")[0]));
+                    eloGain.put(team2.get(i), Integer.parseInt(data.get("team2-" + i).toString().split("=")[1]));
+                }
             }
         }
 
         if (state == GameState.SCORED) {
-            this.mvp = PlayerCache.getPlayer(data.get("mvp").toString());
+            if (!data.get("mvp").toString().equals("none")) {
+                this.mvp = PlayerCache.getPlayer(data.get("mvp").toString());
+            }
             this.scoredBy = guild.getMemberById(data.get("scored-by").toString());
         }
 
@@ -153,27 +169,20 @@ public class Game {
     }
 
     public void pickTeams() {
-
         if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
-
             for (int i = 0; i < queue.getPlayersEachTeam() * 2 - 2; i+=2) {
                 this.team1.add(remainingPlayers.get(i));
                 this.team2.add(remainingPlayers.get(i+1));
             }
 
             start();
-
         }
         else {
-
             sendGameMsg();
-
         }
-
     }
 
     public void start() {
-
         state = GameState.PLAYING;
 
         sendGameMsg();
@@ -182,7 +191,9 @@ public class Game {
             guild.moveVoiceMember(guild.getMemberById(p.getID()), vc2).queue();
         }
 
-
+        if (casual) {
+            closeChannel(1800);
+        }
     }
 
     public void sendGameMsg() {
@@ -285,6 +296,84 @@ public class Game {
         return null;
     }
 
+    public void scoreGame(List<Player> winningTeam, List<Player> losingTeam, Player mvp, Member scoredBy) {
+        eloGain = new HashMap<>();
+
+        for (Player p : players) {
+            eloGain.put(p, 0);
+        }
+
+        state = GameState.SCORED;
+
+        this.scoredBy = scoredBy;
+
+        if (mvp != null) {
+            this.mvp = mvp;
+            mvp.setMvp(mvp.getMvp() + 1);
+            mvp.setElo(mvp.getElo() + mvp.getRank().getMvpElo());
+            eloGain.put(mvp, eloGain.get(mvp) + mvp.getRank().getMvpElo());
+        }
+
+        int difference;
+
+        for (Player p : winningTeam) {
+            int elo = p.getElo();
+            p.win();
+            difference = p.getElo() - elo;
+            eloGain.put(p, eloGain.get(p) + difference);
+            p.fix();
+        }
+
+        for (Player p : losingTeam) {
+            int elo = p.getElo();
+            p.lose();
+            difference = p.getElo() - elo;
+            eloGain.put(p, eloGain.get(p) + difference);
+            p.fix();
+        }
+
+        Player player = PlayerCache.getPlayer(scoredBy.getId());
+        player.setScored(player.getScored() + 1);
+    }
+
+    public void undo() {
+        state = GameState.SUBMITTED;
+
+        for (Player p : eloGain.keySet()) {
+            if (eloGain.get(p) > 0) {
+                p.setWins(p.getWins() - 1);
+            }
+            else {
+                p.setLosses(p.getLosses() - 1);
+            }
+
+            p.setElo(p.getElo() - eloGain.get(p));
+
+            p.fix();
+        }
+
+        Player player = PlayerCache.getPlayer(scoredBy.getId());
+        player.setScored(player.getScored() - 1);
+
+        if (mvp != null) {
+            mvp.setMvp(mvp.getMvp() - 1);
+        }
+    }
+
+    public void closeChannel(int timeSeconds) {
+        Embed embed = new Embed(EmbedType.DEFAULT, "", "Game channel deleting in `" + timeSeconds + "` seconds / `" + timeSeconds / 60 + "` minutes", 1);
+        channel.sendMessageEmbeds(embed.build()).queue();
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                channel.delete().queue();
+            }
+        };
+
+        new Timer().schedule(task, timeSeconds * 1000L);
+    }
+
     public static void writeFile(Game g) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/games/" + g.getNumber() + ".yml"));
@@ -299,26 +388,52 @@ public class Game {
 
             if (g.getState() != GameState.STARTING) {
                 for (int i = 0; i < g.getTeam1().size(); i++) {
-                    bw.write("team1-" + i + ": " + g.getTeam1().get(i).getID() + "\n");
+                    bw.write("team1-" + i + ": " + g.getTeam1().get(i).getID());
+
+                    if (g.getState() == GameState.SCORED) {
+                        bw.write("=" + g.getEloGain().get(g.getTeam1().get(i)));
+                    }
+
+                    bw.write("\n");
                 }
                 for (int i = 0; i < g.getTeam2().size(); i++) {
-                    bw.write("team2-" + i + ": " + g.getTeam2().get(i).getID() + "\n");
+                    bw.write("team2-" + i + ": " + g.getTeam2().get(i).getID());
+
+                    if (g.getState() == GameState.SCORED) {
+                        bw.write("=" + g.getEloGain().get(g.getTeam1().get(i)));
+                    }
+
+                    bw.write("\n");
                 }
             }
 
             if (g.getState() == GameState.SCORED) {
-                bw.write("mvp: " + g.getMvp().getID());
-                bw.write("scored-by: " + g.getScoredBy().getId());
+                if (g.getMvp() != null) {
+                    bw.write("mvp: " + g.getMvp().getID() + "\n");
+                }
+                else {
+                    bw.write("mvp: none\n");
+                }
+
+                bw.write("scored-by: " + g.getScoredBy().getId() + "\n");
             }
 
             if (g.getState() == GameState.VOIDED) {
-                bw.write("scored-by: " + g.getScoredBy().getId());
+                bw.write("scored-by: " + g.getScoredBy().getId() + "\n");
             }
 
             bw.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public HashMap<Player, Integer> getEloGain() {
+        return eloGain;
+    }
+
+    public void setEloGain(HashMap<Player, Integer> eloGain) {
+        this.eloGain = eloGain;
     }
 
     public int getNumber() {
