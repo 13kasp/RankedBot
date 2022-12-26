@@ -19,7 +19,7 @@ public class ForceRegisterCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length != 3) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("wrong-usage").replaceAll("%usage%", "forceregister <ID/mention> <ign>"), 1);
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
@@ -35,7 +35,8 @@ public class ForceRegisterCmd extends Command {
         String ign = args[2];
         ign = ign.replaceAll(" ", "").trim();
 
-        Player player = new Player(ID, ign);
+        Player.writeFile(ID, ign);
+        Player player = new Player(sender.getId());
         player.fix();
 
         Embed reply = new Embed(EmbedType.SUCCESS, "", "You have registered " + guild.getMemberById(ID).getAsMention() + " as `" + ign + "`", 1);

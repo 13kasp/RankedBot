@@ -5,5 +5,6 @@ public enum GameState {
     STARTING,
     PLAYING,
     SUBMITTED,
-    SCORED;
+    SCORED,
+    VOIDED;
 }

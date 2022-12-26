@@ -13,7 +13,7 @@ public class Msg {
 
     public static HashMap<String, String> msgData = new HashMap<>();
 
-    public static void loadMsg() throws FileNotFoundException {
+    public static void loadMsg() {
         String filename = "messages.yml";
         ClassLoader classLoader = RankedBot.class.getClassLoader();
 
@@ -27,17 +27,23 @@ public class Msg {
                 bw.write(result);
                 bw.close();
             }
+
+            Yaml yaml = new Yaml();
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/messages.yml"));
+            for (String s : data.keySet()) {
+                msgData.put(s, data.get(s).toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/messages.yml"));
-        for (String s : data.keySet()) {
-            msgData.put(s, data.get(s).toString());
-        }
-
         System.out.println("Successfully loaded the messages file into memory");
+    }
+
+    public static void reload() {
+        msgData.clear();
+
+        loadMsg();
     }
 
     public static String getMsg(String msg) {

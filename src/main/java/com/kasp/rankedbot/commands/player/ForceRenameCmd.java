@@ -4,6 +4,7 @@ import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,7 +20,7 @@ public class ForceRenameCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length != 3) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("wrong-usage").replaceAll("%usage%", "forcerename <ID/mention> <new ign>"), 1);
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
@@ -36,7 +37,7 @@ public class ForceRenameCmd extends Command {
         String ign = args[2];
         ign = ign.replaceAll(" ", "").trim();
 
-        Player player = new Player(ID, null);
+        Player player = PlayerCache.getPlayer(ID);
         player.setIgn(ign);
         player.fix();
 

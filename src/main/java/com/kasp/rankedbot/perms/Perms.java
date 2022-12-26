@@ -13,7 +13,7 @@ public class Perms {
 
     public static HashMap<String, String> permsData = new HashMap<>();
 
-    public static void loadPerms() throws FileNotFoundException {
+    public static void loadPerms() {
         String filename = "permissions.yml";
         ClassLoader classLoader = RankedBot.class.getClassLoader();
 
@@ -27,17 +27,23 @@ public class Perms {
                 bw.write(result);
                 bw.close();
             }
+
+            Yaml yaml = new Yaml();
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/permissions.yml"));
+            for (String s : data.keySet()) {
+                permsData.put(s, data.get(s).toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/permissions.yml"));
-        for (String s : data.keySet()) {
-            permsData.put(s, data.get(s).toString());
-        }
-
         System.out.println("Successfully loaded the permissions file into memory");
+    }
+
+    public static void reload() {
+        permsData.clear();
+
+        loadPerms();
     }
 
     public static String getPerm(String permission) {

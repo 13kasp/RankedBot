@@ -4,6 +4,7 @@ import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -21,7 +22,7 @@ public class WipeCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length < 2) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("wrong-usage").replaceAll("%usage%", "wipe <ID/mention>"), 1);
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
@@ -38,9 +39,11 @@ public class WipeCmd extends Command {
             long start = System.currentTimeMillis();
 
             for (File file : filesList) {
-                Player player = new Player(file.getName().replaceAll(".yml", ""), null);
+                Player player = PlayerCache.getPlayer(file.getName().replaceAll(".yml", ""));
                 player.wipe();
-                player.fix();
+                if (guild.getMemberById(player.getID()) != null) {
+                    player.fix();
+                }
             }
 
             long end = System.currentTimeMillis();
@@ -52,8 +55,9 @@ public class WipeCmd extends Command {
             msg.replyEmbeds(success.build()).queue();
         }
         else {
-            Player player = new Player(args[1].replaceAll("[^0-9]", ""), null);
+            Player player = PlayerCache.getPlayer(args[1].replaceAll("[^0-9]", ""));
             player.wipe();
+            player.fix();
 
             Embed reply = new Embed(EmbedType.SUCCESS, "Stats wiped", Msg.getMsg("successfully-wiped"), 1);
             msg.replyEmbeds(reply.build()).queue();

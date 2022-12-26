@@ -7,13 +7,18 @@ import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.cache.GamesCache;
 import com.kasp.rankedbot.instance.cache.MapsCache;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
+import com.kasp.rankedbot.instance.cache.QueuesCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Game {
 
@@ -36,6 +41,7 @@ public class Game {
 
     private Player captain1;
     private Player captain2;
+    private Player currentCaptain;
 
     private List<Player> team1;
     private List<Player> team2;
@@ -46,7 +52,7 @@ public class Game {
     private boolean casual;
     private GameMap map;
     private Player mvp;
-    private Member scoredBy;
+    private Member scoredBy; // this acts as voidedBy if game was voided
 
     public Game(List<Player> players, Queue queue) {
         guild = RankedBot.getGuild();
@@ -78,6 +84,11 @@ public class Game {
         this.captain1 = players.get(0);
         this.captain2 = players.get(1);
 
+        currentCaptain = captain1;
+        if (captain1.getElo() > captain2.getElo()) {
+            currentCaptain = captain2;
+        }
+
         this.team1.add(captain1);
         this.team2.add(captain2);
 
@@ -89,6 +100,53 @@ public class Game {
             channel.createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).queue();
             vc1.createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
             vc2.createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
+        }
+
+        for (Player p : remainingPlayers) {
+            guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue();
+        }
+
+        GamesCache.initializeGame(number, this);
+    }
+
+    public Game(int number) {
+        this.number = number;
+        this.guild = RankedBot.getGuild();
+
+        Yaml yaml = new Yaml();
+
+        Map<String, Object> data;
+        try {
+            data = yaml.load(new FileInputStream("RankedBot/games/" + number + ".yml"));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.state = GameState.valueOf(data.get("state").toString().toUpperCase());
+        this.casual = Boolean.parseBoolean(data.get("casual").toString());
+        this.map = MapsCache.getMap(data.get("map").toString());
+        this.channel = guild.getTextChannelById(data.get("channel-id").toString());
+        this.vc1 = guild.getVoiceChannelById(data.get("vc1-id").toString());
+        this.vc2 = guild.getVoiceChannelById(data.get("vc2-id").toString());
+        this.queue = QueuesCache.getQueue(data.get("queue").toString());
+
+        if (state != GameState.STARTING) {
+            for (int i = 0; i < queue.getPlayers().size(); i++) {
+                team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString()));
+            }
+
+            for (int i = 0; i < queue.getPlayers().size(); i++) {
+                team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString()));
+            }
+        }
+
+        if (state == GameState.SCORED) {
+            this.mvp = PlayerCache.getPlayer(data.get("mvp").toString());
+            this.scoredBy = guild.getMemberById(data.get("scored-by").toString());
+        }
+
+        if (state == GameState.VOIDED) {
+            this.scoredBy = guild.getMemberById(data.get("scored-by").toString());
         }
 
         GamesCache.initializeGame(number, this);
@@ -103,24 +161,28 @@ public class Game {
                 this.team2.add(remainingPlayers.get(i+1));
             }
 
-            sendGameMsg();
-
             start();
 
         }
         else {
 
-            for (Player p : remainingPlayers) {
-                guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue();
-            }
-
             sendGameMsg();
+
         }
 
     }
 
     public void start() {
+
         state = GameState.PLAYING;
+
+        sendGameMsg();
+
+        for (Player p : team2) {
+            guild.moveVoiceMember(guild.getMemberById(p.getID()), vc2).queue();
+        }
+
+
     }
 
     public void sendGameMsg() {
@@ -159,9 +221,104 @@ public class Game {
             if (casual) {
                 embed.setDescription("You queued a casual queue meaning this game will have no impact on players' stats");
             }
+
+            embed.setDescription("do not forget to =submit after your game ends");
         }
 
         channel.sendMessage(mentions).setEmbeds(embed.build()).queue();
+    }
+
+    // bool - was the action successful or not
+    public boolean pickPlayer(Player sender, Player picked) {
+        if (state != GameState.STARTING) {
+            return false;
+        }
+
+        if (sender != currentCaptain) {
+            return false;
+        }
+
+        if (!remainingPlayers.contains(picked)) {
+            return false;
+        }
+
+        if (sender == picked) {
+            return false;
+        }
+
+        getPlayerTeam(sender).add(picked);
+        remainingPlayers.remove(picked);
+
+        sendGameMsg();
+
+        if (remainingPlayers.size() == 1) {
+            getOppTeam(sender).add(remainingPlayers.get(0));
+            remainingPlayers.remove(remainingPlayers.get(0));
+
+            start();
+        }
+
+        return true;
+    }
+
+    public List<Player> getPlayerTeam(Player player) {
+        if (team1.contains(player)) {
+            return team1;
+        }
+
+        if (team2.contains(player)) {
+            return team2;
+        }
+
+        return null;
+    }
+
+    public List<Player> getOppTeam(Player player) {
+        if (!team1.contains(player)) {
+            return team1;
+        }
+
+        if (!team2.contains(player)) {
+            return team2;
+        }
+
+        return null;
+    }
+
+    public static void writeFile(Game g) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/games/" + g.getNumber() + ".yml"));
+
+            bw.write("state: " + g.getState() + "\n");
+            bw.write("casual: " + g.isCasual() + "\n");
+            bw.write("map: " + g.getMap() + "\n");
+            bw.write("channel-id: " + g.getChannel().getId() + "\n");
+            bw.write("vc1-id: " + g.getVc1().getId() + "\n");
+            bw.write("vc2-id: " + g.getVc2().getId() + "\n");
+            bw.write("queue-id: " + g.getQueue().getID() + "\n");
+
+            if (g.getState() != GameState.STARTING) {
+                for (int i = 0; i < g.getTeam1().size(); i++) {
+                    bw.write("team1-" + i + ": " + g.getTeam1().get(i).getID() + "\n");
+                }
+                for (int i = 0; i < g.getTeam2().size(); i++) {
+                    bw.write("team2-" + i + ": " + g.getTeam2().get(i).getID() + "\n");
+                }
+            }
+
+            if (g.getState() == GameState.SCORED) {
+                bw.write("mvp: " + g.getMvp().getID());
+                bw.write("scored-by: " + g.getScoredBy().getId());
+            }
+
+            if (g.getState() == GameState.VOIDED) {
+                bw.write("scored-by: " + g.getScoredBy().getId());
+            }
+
+            bw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getNumber() {
@@ -170,5 +327,149 @@ public class Game {
 
     public TextChannel getChannel() {
         return channel;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public Guild getGuild() {
+        return guild;
+    }
+
+    public void setGuild(Guild guild) {
+        this.guild = guild;
+    }
+
+    public Category getChannelsCategory() {
+        return channelsCategory;
+    }
+
+    public void setChannelsCategory(Category channelsCategory) {
+        this.channelsCategory = channelsCategory;
+    }
+
+    public Category getVcsCategory() {
+        return vcsCategory;
+    }
+
+    public void setVcsCategory(Category vcsCategory) {
+        this.vcsCategory = vcsCategory;
+    }
+
+    public void setChannel(TextChannel channel) {
+        this.channel = channel;
+    }
+
+    public VoiceChannel getVc1() {
+        return vc1;
+    }
+
+    public void setVc1(VoiceChannel vc1) {
+        this.vc1 = vc1;
+    }
+
+    public VoiceChannel getVc2() {
+        return vc2;
+    }
+
+    public void setVc2(VoiceChannel vc2) {
+        this.vc2 = vc2;
+    }
+
+    public Queue getQueue() {
+        return queue;
+    }
+
+    public void setQueue(Queue queue) {
+        this.queue = queue;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+
+    public Player getCaptain1() {
+        return captain1;
+    }
+
+    public void setCaptain1(Player captain1) {
+        this.captain1 = captain1;
+    }
+
+    public Player getCaptain2() {
+        return captain2;
+    }
+
+    public void setCaptain2(Player captain2) {
+        this.captain2 = captain2;
+    }
+
+    public List<Player> getTeam1() {
+        return team1;
+    }
+
+    public void setTeam1(List<Player> team1) {
+        this.team1 = team1;
+    }
+
+    public List<Player> getTeam2() {
+        return team2;
+    }
+
+    public void setTeam2(List<Player> team2) {
+        this.team2 = team2;
+    }
+
+    public List<Player> getRemainingPlayers() {
+        return remainingPlayers;
+    }
+
+    public void setRemainingPlayers(List<Player> remainingPlayers) {
+        this.remainingPlayers = remainingPlayers;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
+
+    public boolean isCasual() {
+        return casual;
+    }
+
+    public void setCasual(boolean casual) {
+        this.casual = casual;
+    }
+
+    public GameMap getMap() {
+        return map;
+    }
+
+    public void setMap(GameMap map) {
+        this.map = map;
+    }
+
+    public Player getMvp() {
+        return mvp;
+    }
+
+    public void setMvp(Player mvp) {
+        this.mvp = mvp;
+    }
+
+    public Member getScoredBy() {
+        return scoredBy;
+    }
+
+    public void setScoredBy(Member scoredBy) {
+        this.scoredBy = scoredBy;
     }
 }

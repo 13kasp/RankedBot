@@ -3,8 +3,9 @@ package com.kasp.rankedbot.instance;
 import com.kasp.rankedbot.instance.cache.RanksCache;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class Rank {
@@ -33,6 +34,30 @@ public class Rank {
         }
 
         RanksCache.initializeRank(ID, this);
+    }
+
+    public static void createFile(String ID, String startingElo, String endingElo, String winElo, String loseElo, String mvpElo) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/ranks/" + ID + ".yml"));
+            bw.write("starting-elo: " + startingElo + "\n");
+            bw.write("ending-elo: " + endingElo + "\n");
+            bw.write("win-elo: " + winElo + "\n");
+            bw.write("lose-elo: " + loseElo + "\n");
+            bw.write("mvp-elo: " + mvpElo + "\n");
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteFile(String ID) {
+        RanksCache.removeRank(RanksCache.getRank(ID));
+
+        try {
+            Files.deleteIfExists(Path.of("RankedBot/ranks/" + ID + ".yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getID() {

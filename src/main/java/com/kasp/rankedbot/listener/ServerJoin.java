@@ -3,6 +3,7 @@ package com.kasp.rankedbot.listener;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -14,7 +15,7 @@ public class ServerJoin extends ListenerAdapter {
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
 
         if (Player.isRegistered(event.getMember().getId())) {
-            Player player = new Player(event.getMember().getId(), null);
+            Player player = PlayerCache.getPlayer(event.getMember().getId());
             player.fix();
 
             Embed embed = new Embed(EmbedType.DEFAULT, "Welcome Back", "I've noticed it's not your first time in this server" +

@@ -4,6 +4,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Queue;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.cache.QueuesCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -28,7 +29,7 @@ public class QueueJoin extends ListenerAdapter {
         String ID = event.getChannelJoined().getId();
         Queue queue = QueuesCache.getQueue(event.getChannelJoined().getId());
 
-        Player player = new Player(ID, null);
+        Player player = PlayerCache.getPlayer(ID);
         if (player.isBanned()) {
             event.getGuild().kickVoiceMember(event.getMember()).queue();
 

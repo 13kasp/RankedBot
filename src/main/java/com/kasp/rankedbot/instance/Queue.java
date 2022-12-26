@@ -4,8 +4,9 @@ import com.kasp.rankedbot.PickingMode;
 import com.kasp.rankedbot.instance.cache.QueuesCache;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,28 @@ public class Queue {
         }
     }
 
+    public static void createFile(String ID, int playersEachTeam, PickingMode pickingMode, boolean casual) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/queues/" + ID + ".yml"));
+            bw.write("players-in-team: " + playersEachTeam + "\n");
+            bw.write("picking: " + pickingMode + "\n");
+            bw.write("casual: " + casual + "\n");
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteFile(String ID) {
+        QueuesCache.removeQueue(QueuesCache.getQueue(ID));
+
+        try {
+            Files.deleteIfExists(Path.of("RankedBot/queues/" + ID + ".yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void removePlayer(Player player) {
         players.remove(player);
     }
@@ -59,5 +82,8 @@ public class Queue {
     }
     public String getID() {
         return ID;
+    }
+    public List<Player> getPlayers() {
+        return players;
     }
 }

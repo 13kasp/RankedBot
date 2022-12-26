@@ -20,7 +20,7 @@ public class RegisterCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length != 2) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("wrong-usage").replaceAll("%usage%", "register <ign>"), 1);
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
@@ -40,7 +40,8 @@ public class RegisterCmd extends Command {
             return;
         }
 
-        Player player = new Player(sender.getId(), ign);
+        Player.writeFile(sender.getId(), ign);
+        Player player = new Player(sender.getId());
         player.fix();
 
         Embed reply = new Embed(EmbedType.SUCCESS, "Error", Msg.getMsg("successfully-registered"), 1);

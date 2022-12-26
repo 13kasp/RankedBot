@@ -3,6 +3,8 @@ package com.kasp.rankedbot;
 import com.kasp.rankedbot.commands.CommandManager;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.*;
+import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.PagesEvents;
 import com.kasp.rankedbot.listener.QueueJoin;
 import com.kasp.rankedbot.listener.ServerJoin;
@@ -20,6 +22,8 @@ import org.yaml.snakeyaml.Yaml;
 import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RankedBot {
 
@@ -103,9 +107,40 @@ public class RankedBot {
             }
         }
 
+        if (new File("RankedBot/players").listFiles().length > 0) {
+            for (File f : new File("RankedBot/players").listFiles()) {
+                new Player(f.getName().replaceAll(".yml", ""));
+            }
+        }
+
+        if (new File("RankedBot/games").listFiles().length > 0) {
+            for (File f : new File("RankedBot/games").listFiles()) {
+                new Game(Integer.parseInt(f.getName().replaceAll(".yml", "")));
+            }
+        }
+
         System.out.println("RankedBot has been successfully enabled!");
         System.out.println("NOTE: this bot can only be used on 1 server, otherwise it'll break");
         System.out.println("don't forget to configure config.yml and permissions.yml before using it. You can also edit messages.yml (optional)");
+        System.out.println("WARNING: do not restart / stop this bot without executing the command =savedata to prevent data loss");
+        System.out.println("Player and game data saves automatically every 2 hours");
+
+        TimerTask hourlyTask = new TimerTask () {
+            @Override
+            public void run () {
+                System.out.println("[!] Saving players and games");
+                for (Player p : PlayerCache.getPlayers().values()) {
+                    Player.writeFile(p.getID(), null);
+                }
+                System.out.println("- Players data successfully saved");
+                for (Game g : GamesCache.getGames().values()) {
+                        Game.writeFile(g);
+                }
+                System.out.println("- Games data successfully saved");
+            }
+        };
+
+        new Timer().schedule (hourlyTask, 0L, 1000*60*60*2);
     }
 
     public static Guild getGuild() {

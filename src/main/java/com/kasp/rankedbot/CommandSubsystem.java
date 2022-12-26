@@ -2,6 +2,11 @@ package com.kasp.rankedbot;
 
 public enum CommandSubsystem {
 
+    SERVER,
     PLAYER,
-    SERVER;
+    GAME,
+    QUEUE,
+    RANK,
+    MAP,
+    THEME;
 }

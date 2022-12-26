@@ -39,55 +39,44 @@ public class Player {
     private boolean isBanned;
     private String bannedTill;
 
-    public Player(String ID, String ign) {
+    public Player(String ID) {
         this.ID = ID;
 
-        if (PlayerCache.containsPlayer(ID)) {
-            PlayerCache.initializePlayer(ID, this);
-            return;
-        }
+        try {
+            Yaml yaml = new Yaml();
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/players/" + ID));
 
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = null;
+            this.ign = data.get("name").toString();
+            this.elo = Integer.parseInt(data.get("elo").toString());
+            this.peakElo = Integer.parseInt(data.get("peak-elo").toString());
+            this.wins = Integer.parseInt(data.get("wins").toString());
+            this.losses = Integer.parseInt(data.get("losses").toString());
+            this.winStreak = Integer.parseInt(data.get("win-streak").toString());
+            this.lossStreak = Integer.parseInt(data.get("loss-streak").toString());
+            this.highestWS = Integer.parseInt(data.get("highest-ws").toString());
+            this.highestLS = Integer.parseInt(data.get("highest-ls").toString());
+            this.mvp = Integer.parseInt(data.get("mvp").toString());
+            this.kills = Integer.parseInt(data.get("kills").toString());
+            this.deaths = Integer.parseInt(data.get("deaths").toString());
+            this.strikes = Integer.parseInt(data.get("strikes").toString());
+            this.scored = Integer.parseInt(data.get("scored").toString());
+            this.gold = Integer.parseInt(data.get("gold").toString());
+            this.level = Integer.parseInt(data.get("level").toString());
+            this.xp = Integer.parseInt(data.get("xp").toString());
+            this.theme = ThemesCache.getTheme(data.get("theme").toString());
 
-        if (ign == null) {
-            try {
-                data = yaml.load(new FileInputStream("RankedBot/players/" + ID));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            ownedThemes = new ArrayList<>();
+
+            String[] themes = data.get("owned-themes").toString().split(",");
+            for (String s : themes) {
+                ownedThemes.add(ThemesCache.getTheme(s));
             }
+
+            this.isBanned = Boolean.parseBoolean(data.get("is-banned").toString());
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        else {
-            writeFile(true);
-        }
-
-        this.ign = data.get("name").toString();
-        this.elo = Integer.parseInt(data.get("elo").toString());
-        this.peakElo = Integer.parseInt(data.get("peak-elo").toString());
-        this.wins = Integer.parseInt(data.get("wins").toString());
-        this.losses = Integer.parseInt(data.get("losses").toString());
-        this.winStreak = Integer.parseInt(data.get("win-streak").toString());
-        this.lossStreak = Integer.parseInt(data.get("loss-streak").toString());
-        this.highestWS = Integer.parseInt(data.get("highest-ws").toString());
-        this.highestLS = Integer.parseInt(data.get("highest-ls").toString());
-        this.mvp = Integer.parseInt(data.get("mvp").toString());
-        this.kills = Integer.parseInt(data.get("kills").toString());
-        this.deaths = Integer.parseInt(data.get("deaths").toString());
-        this.strikes = Integer.parseInt(data.get("strikes").toString());
-        this.scored = Integer.parseInt(data.get("scored").toString());
-        this.gold = Integer.parseInt(data.get("gold").toString());
-        this.level = Integer.parseInt(data.get("level").toString());
-        this.xp = Integer.parseInt(data.get("xp").toString());
-        this.theme = ThemesCache.getTheme(data.get("theme").toString());
-
-        ownedThemes = new ArrayList<>();
-
-        String[] themes = data.get("owned-themes").toString().split(",");
-        for (String s : themes) {
-            ownedThemes.add(ThemesCache.getTheme(s));
-        }
-
-        this.isBanned = Boolean.parseBoolean(data.get("is-banned").toString());
 
         PlayerCache.initializePlayer(ID, this);
     }
@@ -128,6 +117,44 @@ public class Player {
         deaths = 0;
     }
 
+    public void win() {
+        wins++;
+        winStreak++;
+        elo += getRank().getWinElo();
+
+        if (peakElo < elo) {
+            peakElo = elo;
+        }
+
+        if (lossStreak > 0) {
+            lossStreak = 0;
+        }
+
+        if (highestWS < winStreak) {
+            highestWS = winStreak;
+        }
+    }
+
+    public void lose() {
+        losses++;
+        lossStreak++;
+
+        if (elo - getRank().getLoseElo() > 0) {
+            elo -= getRank().getLoseElo();
+        }
+        else {
+            elo = 0;
+        }
+
+        if (winStreak > 0) {
+            winStreak = 0;
+        }
+
+        if (highestLS < lossStreak) {
+            highestLS = lossStreak;
+        }
+    }
+
     public int getPlacement(Statistic statistic) {
 
         List<String> lb = Leaderboard.getLeaderboard(statistic);
@@ -155,9 +182,9 @@ public class Player {
         return new File("RankedBot/players/" + ID).exists();
     }
 
-    public void writeFile(boolean isRegistering) {
+    public static void writeFile(String ID, String ign) {
         try {
-            if (isRegistering) {
+            if (ign != null) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/players/" + ID + ".yml"));
 
                 bw.write("name: " + ign + "\n");
@@ -184,38 +211,40 @@ public class Player {
                 bw.close();
             }
             else {
+                Player player = PlayerCache.getPlayer(ID);
+
                 BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/players/" + ID + ".yml"));
 
-                bw.write("name: " + ign + "\n");
-                bw.write("elo: " + elo + "\n");
-                bw.write("peak-elo: " + peakElo + "\n");
-                bw.write("wins: " + wins + "\n");
-                bw.write("losses: " + losses + "\n");
-                bw.write("win-streak: " + winStreak + "\n");
-                bw.write("loss-streak: " + lossStreak + "\n");
-                bw.write("highest-ws: " + highestWS + "\n");
-                bw.write("highest-ls: " + highestLS + "\n");
-                bw.write("mvp: " + mvp + "\n");
-                bw.write("kills: " + kills + "\n");
-                bw.write("deaths: " + deaths + "\n");
-                bw.write("strikes: " + strikes + "\n");
-                bw.write("scored: " + scored + "\n");
-                bw.write("gold: " + gold + "\n");
-                bw.write("level: " + level + "\n");
-                bw.write("xp: " + xp + "\n");
-                bw.write("theme: " + theme.getName() + "\n");
+                bw.write("name: " + player.getIgn() + "\n");
+                bw.write("elo: " + player.getElo() + "\n");
+                bw.write("peak-elo: " + player.getPeakElo() + "\n");
+                bw.write("wins: " + player.getWins() + "\n");
+                bw.write("losses: " + player.getLosses() + "\n");
+                bw.write("win-streak: " + player.getWinStreak() + "\n");
+                bw.write("loss-streak: " + player.getLossStreak() + "\n");
+                bw.write("highest-ws: " + player.getHighestWS() + "\n");
+                bw.write("highest-ls: " + player.getHighestLS() + "\n");
+                bw.write("mvp: " + player.getMvp() + "\n");
+                bw.write("kills: " + player.getKills() + "\n");
+                bw.write("deaths: " + player.getDeaths() + "\n");
+                bw.write("strikes: " + player.getStrikes() + "\n");
+                bw.write("scored: " + player.getScored() + "\n");
+                bw.write("gold: " + player.getGold() + "\n");
+                bw.write("level: " + player.getLevel() + "\n");
+                bw.write("xp: " + player.getXp() + "\n");
+                bw.write("theme: " + player.getTheme().getName() + "\n");
 
                 StringBuilder themes = new StringBuilder();
-                for (Theme t : ownedThemes) {
+                for (Theme t : player.getOwnedThemes()) {
                     themes.append(t.getName());
-                    if (ownedThemes.indexOf(t) != ownedThemes.size() - 1) {
+                    if (player.getOwnedThemes().indexOf(t) != player.getOwnedThemes().size() - 1) {
                         themes.append(",");
                     }
                 }
 
                 bw.write("owned-themes: " + themes + "\n");
-                bw.write("is-banned: " + isBanned + "\n");
-                bw.write("banned-till: " + bannedTill + "\n");
+                bw.write("is-banned: " + player.isBanned + "\n");
+                bw.write("banned-till: " + player.getBannedTill() + "\n");
                 bw.close();
             }
 

@@ -7,6 +7,7 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
@@ -28,7 +29,7 @@ public class StatsCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         if (args.length > 2) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("wrong-usage").replaceAll("%usage%", "stats [ID/mention/\"full\"]"), 1);
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
@@ -43,16 +44,14 @@ public class StatsCmd extends Command {
                 ID = args[1].replaceAll("[^0-9]","");
         }
 
-        Player player = new Player(ID, null);
+        Player player = PlayerCache.getPlayer(ID);
 
         DecimalFormat f = new DecimalFormat("#.##");
 
-        double templosses;
-        if (player.getLosses() == 0)
-            templosses = 1;
-        else
+        double templosses = 1;
+        if (player.getLosses() > 0)
             templosses = player.getLosses();
-
+        
         int games = player.getWins() + player.getLosses();
 
         if (args.length == 2 && args[1].equals("full")) {
