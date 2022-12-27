@@ -8,7 +8,7 @@ token:
 status: ONLINE
 
 # Your server's name
-server-name: RBW
+server-name: RankedBot
 
 # Bot's prefix
 prefix: =
@@ -18,6 +18,9 @@ alerts-channel: 947177745690034311
 
 # Elo prefix formatting, use %elo% for player elo
 elo-formatting: "[%elo%] "
+
+# Allow unregistered players to use commands? Enable this to set up the bot
+unregistered-cmd-usage: true
 
 #============================== REGISTERING
 
@@ -50,12 +53,12 @@ banned-role: 956947112774475816
 ban-channel: 947177745690034311
 
 # Ban time for strikes (in hours)
-strike1: 0
-strike2: 2
-strike3: 12
-strike4: 24
+strike-1: 0
+strike-2: 2
+strike-3: 12
+strike-4: 24
 # 5+
-strike5: 48
+strike-5: 48
 
 #============================== SCREENSHARING
 
@@ -89,11 +92,12 @@ games-announcing: 994537829520654426
 # Scored games announcing channel (leave blank to disable)
 scored-announcing: 995311293764472914
 
-# Display text helping people to invite eachother to party (leave blank to disable)
+# Display text helping people to invite eachother to party
+# useful for ranked servers which depends on other mc servers (leave blank to disable)
 party-invite-cmd: "/p invite"
 
 # Game channel deleting time after its scored (in seconds)
-game-deleting-time: 300
+game-deleting-time: 600
 
 # How many screenshots do players have to attach when using =submit (for proof)
 submitting-attachments: 1
@@ -103,7 +107,21 @@ scorer-role: 947231507343364097
 
 #============================== STATS IMAGE(S)
 
-name-pixels: 35,52
+s-enabled: true
+
+# don't change this if you dk what you're doing
+s-text-font: "Minecraft"
+s-text-size: 31
+
+# configure color for values (RGB)
+s-values-color: 255,255,255
+
+# player ign
+ign-size: 42
+ign-pixels: 35,52
+
+# configure the location of where the values are displayed (pixels)
+# or leave blank to disable displaying certain values
 
 strikes-pixels: 41948,86114654
 scored-pixels: 169,292
@@ -119,14 +137,5 @@ winstreak-pixels: 833,428
 losses-pixels: 799,463
 losestreak-pixels: 862,497
 
-skin-pixels: 500,500
-
-#============================== IN-GAME BOT INTEGRATION
-
-# ONLY USE THIS IF U KNOW WHAT YOU'RE DOING
-
-# Bots communication channel
-bot-communication: 947177745690034311
-
-# Linking with in-game instead of normally registering/renaming
-bot-linking: true
+skin-pixels: 200,200
+skin-size: 400

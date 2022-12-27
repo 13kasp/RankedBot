@@ -24,7 +24,7 @@ public class Queue {
 
         Yaml yaml = new Yaml();
         try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/queues/" + ID));
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/queues/" + ID + ".yml"));
 
             this.playersEachTeam = Integer.parseInt(data.get("players-each-team").toString());
             this.pickingMode = PickingMode.valueOf(data.get("picking-mode").toString().toUpperCase());
@@ -43,14 +43,16 @@ public class Queue {
 
         if (players.size() == playersEachTeam * 2) {
             new Game(players, this).pickTeams();
+
+            players.clear();
         }
     }
 
     public static void createFile(String ID, int playersEachTeam, PickingMode pickingMode, boolean casual) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/queues/" + ID + ".yml"));
-            bw.write("players-in-team: " + playersEachTeam + "\n");
-            bw.write("picking: " + pickingMode + "\n");
+            bw.write("players-each-team: " + playersEachTeam + "\n");
+            bw.write("picking-mode: " + pickingMode + "\n");
             bw.write("casual: " + casual + "\n");
             bw.close();
         } catch (IOException e) {

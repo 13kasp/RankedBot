@@ -85,6 +85,7 @@ banned-role-not-set: "Please set the banned role in `config.yml`"
 
 # =unban and =baninfo
 player-not-banned: "This player isn't banned"
+player-unbanned: "Successfully unbanned specified player"
 
 # =bans
 no-bans-found: "No bans found"

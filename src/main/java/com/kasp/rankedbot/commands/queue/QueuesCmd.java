@@ -46,7 +46,7 @@ public class QueuesCmd extends Command {
                 }
             }
 
-            embed.addField("<#" + q.getID() + "> - " + q.getPlayers().size() + "/" + q.getPlayersEachTeam() * 2 + "`",
+            embed.addField(guild.getVoiceChannelById(q.getID()).getName() + " - `" + q.getPlayers().size() + "/" + q.getPlayersEachTeam() * 2 + "`",
                     content, false);
         }
 

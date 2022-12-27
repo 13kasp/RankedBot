@@ -42,9 +42,6 @@ public class HelpCmd extends Command {
         }
 
         if (args.length == 2) {
-            String aliases = "";
-            String permissions = "";
-
             CommandSubsystem subsystem = CommandSubsystem.valueOf(args[1].toUpperCase());
 
             ArrayList<Command> subsystemCmds = new ArrayList<>();
@@ -62,6 +59,9 @@ public class HelpCmd extends Command {
 
                 for (int i = 0; i < 3; i++) {
                     if (i + j < subsystemCmds.size()) {
+
+                        String aliases = "";
+                        String permissions = "";
 
                         for (String s : subsystemCmds.get(i + j).getAliases())
                             aliases += "`" + s + "` ";

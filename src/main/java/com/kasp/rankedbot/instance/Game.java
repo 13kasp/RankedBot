@@ -70,7 +70,7 @@ public class Game {
 
         this.casual = queue.isCasual();
 
-        List<GameMap> maps = (List<GameMap>) MapsCache.getMaps().values();
+        List<GameMap> maps = new ArrayList<>(MapsCache.getMaps().values());
         Collections.shuffle(maps);
         this.map = maps.get(0);
 
@@ -92,6 +92,9 @@ public class Game {
 
         this.team1.add(captain1);
         this.team2.add(captain2);
+
+        guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue();
+        guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue();
 
         remainingPlayers = players;
         remainingPlayers.remove(captain1);
@@ -225,10 +228,21 @@ public class Game {
             embed.addField("Remaining", remaining, false);
         }
 
-        embed.addField("Randomly Picked Map", "**" + map + "** — `Height: " + map.getHeight() + "` (" + map.getTeam1() + " vs " + map.getTeam2() + ")", false);
+        embed.addField("Randomly Picked Map", "**" + map.getName() + "** — `Height: " + map.getHeight() + "` (" + map.getTeam1() + " vs " + map.getTeam2() + ")", false);
 
         if (remainingPlayers.size() == 0) {
             embed.setTitle("Game `#" + number + "` has started!");
+
+            guild.getTextChannelById(Config.getValue("games-announcing")).sendMessageEmbeds(embed.build()).queue();
+
+            if (Config.getValue("party-invite-cmd") != null) {
+                String party = Config.getValue("party-invite-cmd");
+                for (Player p : players) {
+                    party += " " + p.getIgn();
+                }
+                embed.addField("Party Invite Cmd", "`" + party + "`", false);
+            }
+
             if (casual) {
                 embed.setDescription("You queued a casual queue meaning this game will have no impact on players' stats");
             }
@@ -376,7 +390,7 @@ public class Game {
 
     public static void writeFile(Game g) {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/games/" + g.getNumber() + ".yml"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/games/" + g.getNumber() + ".yml"));
 
             bw.write("state: " + g.getState() + "\n");
             bw.write("casual: " + g.isCasual() + "\n");

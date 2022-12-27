@@ -44,7 +44,7 @@ public class RegisterCmd extends Command {
         Player player = new Player(sender.getId());
         player.fix();
 
-        Embed reply = new Embed(EmbedType.SUCCESS, "Error", Msg.getMsg("successfully-registered"), 1);
+        Embed reply = new Embed(EmbedType.SUCCESS, "", Msg.getMsg("successfully-registered"), 1);
         msg.replyEmbeds(reply.build()).queue();
     }
 }

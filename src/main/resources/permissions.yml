@@ -3,76 +3,59 @@
 # write "everyone" instead of an id to make it so everyone can use the command
 # leave blank to disable the command
 
-# Commands:
+# server commands
 help: everyone
+reloadconfig: everyone
+savedata: everyone
+info: everyone
 
+# player commands
 register: everyone
 rename: everyone
 fix: everyone
-stats: everyone
-ss: everyone
-lb: everyone
-
-pick: everyone
-queue: everyone
-queuestats: everyone
-void: everyone
-gameinfo: everyone
-submit: everyone
-
-baninfo: everyone
-bans: everyone
-
-ranks: everyone
-
-maps: everyone
-
-theme: everyone
-
-# Important commands:
-
-# ====== RANKS
-addrank: everyone
-delrank: everyone
-getrankfile: everyone
-setrankfile: everyone
-
-# ====== MAPS
-addmap: everyone
-delmap: everyone
-getmapfile: everyone
-setmapfile: everyone
-
-# ====== QUEUES
-addqueue: everyone
-delqueue: everyone
-getqueuefile: everyone
-setqueuefile: everyone
-
-# ====== BANNING
-ban: everyone
-unban: everyone
-strike: everyone
-
-# ====== PLAYERS
-getplayerfile: everyone
-setplayerfile: everyone
-wipe: everyone
 forceregister: everyone
 forcerename: everyone
+wipe: everyone
+stats: everyone
+leaderboard: everyone
 modify: everyone
+screenshare: everyone
 
-# ====== SCORING
-win: everyone
-lose: everyone
+# game commands
+queue: everyone
+queuestats: everyone
+gameinfo: everyone
+pick: everyone
+void: everyone
+submit: everyone
 score: everyone
 undogame: everyone
+win: everyone
+lose: everyone
 
-# ====== THEMES
-addtheme: everyone
-deltheme: everyone
+# queue commands
+addqueue: everyone
+deletequeue: everyone
+queues: everyone
+
+# rank commands
+addrank: everyone
+deleterank: everyone
+ranks: everyone
+
+# map commands
+addmap: everyone
+deletemap: everyone
+maps: everyone
+
+# theme commands
 givetheme: everyone
 removetheme: everyone
+theme: everyone
 
-# ====== BOT
-savedata: everyone
+# moderation commands
+ban: everyone
+unban: everyone
+baninfo: everyone
+bans: everyone
+strike: everyone

@@ -29,16 +29,14 @@ public class ThemeCmd extends Command {
 
         String name = args[1];
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "", "", 1);
-
-        if (name == "list") {
+        if (name.equals("list")) {
             String themes = "";
             for (Theme t : ThemesCache.getThemes().values()) {
                 themes += "`" + t.getName() + "` ";
             }
 
-            embed.setTitle("All themes `(" + ThemesCache.getThemes().size() + ")`");
-            embed.setDescription(themes);
+            Embed embed = new Embed(EmbedType.DEFAULT, "All themes `(" + ThemesCache.getThemes().size() + ")`", themes, 1);
+            msg.replyEmbeds(embed.build()).queue();
         }
         else {
             if (!ThemesCache.containsTheme(name)) {
@@ -59,10 +57,8 @@ public class ThemeCmd extends Command {
 
             player.setTheme(theme);
 
-            embed.setType(EmbedType.SUCCESS);
-            embed.setDescription("You have successfully selected theme `" + theme.getName() + "`");
+            Embed embed = new Embed(EmbedType.SUCCESS, "", "You have successfully selected theme `" + theme.getName() + "`", 1);
+            msg.replyEmbeds(embed.build()).queue();
         }
-
-        msg.replyEmbeds(embed.build()).queue();
     }
 }

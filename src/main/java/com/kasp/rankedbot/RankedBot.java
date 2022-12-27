@@ -37,6 +37,7 @@ public class RankedBot {
 
         new File("RankedBot/players").mkdirs();
         new File("RankedBot/ranks").mkdirs();
+        new File("RankedBot/games").mkdirs();
         new File("RankedBot/maps").mkdirs();
         new File("RankedBot/queues").mkdirs();
         new File("RankedBot/fonts").mkdirs();
@@ -61,11 +62,9 @@ public class RankedBot {
             e.printStackTrace();
         }
 
-        guild = jda.getGuilds().get(0);
-
         if (!new File("RankedBot/serverstats.yml").exists()) {
             try {
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RBW/serverstats.yml"));
+                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/serverstats.yml"));
 
                 bw.write("games-played: 0");
                 bw.close();
@@ -103,7 +102,7 @@ public class RankedBot {
 
         if (new File("RankedBot/themes").listFiles().length > 0) {
             for (File f : new File("RankedBot/themes").listFiles()) {
-                new Theme(f.getName().replaceAll(".yml", ""));
+                new Theme(f.getName().replaceAll(".png", ""));
             }
         }
 
@@ -119,11 +118,27 @@ public class RankedBot {
             }
         }
 
-        System.out.println("RankedBot has been successfully enabled!");
-        System.out.println("NOTE: this bot can only be used on 1 server, otherwise it'll break");
-        System.out.println("don't forget to configure config.yml and permissions.yml before using it. You can also edit messages.yml (optional)");
-        System.out.println("WARNING: do not restart / stop this bot without executing the command =savedata to prevent data loss");
-        System.out.println("Player and game data saves automatically every 2 hours");
+        System.out.println("Finishing up... this might take around 10 seconds");
+
+        // get guild
+        TimerTask task = new TimerTask () {
+            @Override
+            public void run () {
+                guild = jda.getGuilds().get(0);
+
+                System.out.println("-------------------------------");
+
+                System.out.println("RankedBot has been successfully enabled!");
+                System.out.println("NOTE: this bot can only be used on 1 server, otherwise it'll break");
+                System.out.println("don't forget to configure config.yml and permissions.yml before using it. You can also edit messages.yml (optional)");
+                System.out.println("WARNING: do not restart / stop this bot without executing the command =savedata to prevent data loss");
+                System.out.println("Player and game data saves automatically every 2 hours");
+
+                System.out.println("-------------------------------");
+            }
+        };
+
+        new Timer().schedule(task, 10000);
 
         TimerTask hourlyTask = new TimerTask () {
             @Override
@@ -140,7 +155,7 @@ public class RankedBot {
             }
         };
 
-        new Timer().schedule (hourlyTask, 0L, 1000*60*60*2);
+        new Timer().schedule(hourlyTask, 1000*60*60*2, 1000*60*60*2);
     }
 
     public static Guild getGuild() {

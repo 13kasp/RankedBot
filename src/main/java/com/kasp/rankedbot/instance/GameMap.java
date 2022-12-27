@@ -20,7 +20,7 @@ public class GameMap {
 
         Yaml yaml = new Yaml();
         try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/maps/" + name));
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/maps/" + name + ".yml"));
 
             this.height = Integer.parseInt(data.get("height-limit").toString());
             this.team1 = data.get("team-1").toString();

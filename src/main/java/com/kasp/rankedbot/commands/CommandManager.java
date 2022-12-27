@@ -6,6 +6,7 @@ import com.kasp.rankedbot.commands.game.*;
 import com.kasp.rankedbot.commands.map.AddMapCmd;
 import com.kasp.rankedbot.commands.map.DeleteMapCmd;
 import com.kasp.rankedbot.commands.map.MapsCmd;
+import com.kasp.rankedbot.commands.moderation.*;
 import com.kasp.rankedbot.commands.player.*;
 import com.kasp.rankedbot.commands.queue.AddQueueCmd;
 import com.kasp.rankedbot.commands.queue.DeleteQueueCmd;
@@ -14,6 +15,7 @@ import com.kasp.rankedbot.commands.rank.AddRankCmd;
 import com.kasp.rankedbot.commands.rank.DeleteRankCmd;
 import com.kasp.rankedbot.commands.rank.RanksCmd;
 import com.kasp.rankedbot.commands.server.HelpCmd;
+import com.kasp.rankedbot.commands.server.InfoCmd;
 import com.kasp.rankedbot.commands.server.ReloadConfigCmd;
 import com.kasp.rankedbot.commands.server.SaveDataCmd;
 import com.kasp.rankedbot.commands.theme.GiveThemeCmd;
@@ -38,9 +40,10 @@ public class CommandManager extends ListenerAdapter {
     static ArrayList<Command> commands = new ArrayList<>();
 
     public CommandManager() {
-        commands.add(new HelpCmd("help", "help [sub-system]", new String[]{"info"}, "See the available server commands", CommandSubsystem.SERVER));
+        commands.add(new HelpCmd("help", "help [sub-system]", new String[]{}, "See the available server commands", CommandSubsystem.SERVER));
         commands.add(new ReloadConfigCmd("reloadconfig", "reloadconfig", new String[]{"reload", "rc"}, "Reload the config (update values)", CommandSubsystem.SERVER));
         commands.add(new SaveDataCmd("savedata", "savedata", new String[]{"save", "sd"}, "Save player and games data", CommandSubsystem.SERVER));
+        commands.add(new InfoCmd("info", "info", new String[]{}, "View some info about the server and bot", CommandSubsystem.SERVER));
 
         commands.add(new RegisterCmd("register", "register <in-game name>", new String[]{}, "Register yourself to start playing", CommandSubsystem.PLAYER));
         commands.add(new RenameCmd("rename", "rename <in-game name>", new String[]{}, "Change your in-game name", CommandSubsystem.PLAYER));
@@ -76,9 +79,14 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new DeleteMapCmd("deletemap", "deletemap <name>", new String[]{"delm", "delmap"}, "Delete an in-game map", CommandSubsystem.MAP));
         commands.add(new MapsCmd("maps", "maps", new String[]{}, "View all maps and info about them", CommandSubsystem.MAP));
 
-        commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "give specified player access to a theme", CommandSubsystem.THEME));
-        commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "remove specified player's access to a theme", CommandSubsystem.THEME));
-        commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "select a theme or use \"list\" to view all themes", CommandSubsystem.THEME));
+        commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "Give specified player access to a theme", CommandSubsystem.THEME));
+        commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "Remove specified player's access to a theme", CommandSubsystem.THEME));
+        commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "Select a theme or use \"list\" to view all themes", CommandSubsystem.THEME));
+
+        commands.add(new Ban("ban", "ban <ID/mention> <time> <reason>", new String[]{}, "Ban a player from queueing", CommandSubsystem.MODERATION));
+        commands.add(new Unban("unban", "unban <ID/mention>", new String[]{}, "Unban a banned player", CommandSubsystem.MODERATION));
+        commands.add(new BanInfo("baninfo", "baninfo <ID/mention>", new String[]{}, "View info about a specific ban", CommandSubsystem.MODERATION));
+        commands.add(new Strike("strike", "strike <ID/mention> <reason>", new String[]{}, "Strike a player - take away elo + ban from queueing (depends on how many strikes the player already has)", CommandSubsystem.MODERATION));
     }
 
     @Override
@@ -95,14 +103,14 @@ public class CommandManager extends ListenerAdapter {
             return;
         }
 
-        if (!Player.isRegistered(m.getId())) {
-            Embed reply = new Embed(EmbedType.ERROR, "Not Registered", Msg.getMsg("not-registered"), 1);
-            msg.replyEmbeds(reply.build()).queue();
-            return;
-        }
-
-        if (Boolean.parseBoolean(Config.getValue("log-commands"))) {
-            System.out.println("[RankedBot] " + m.getUser() .getAsTag() + " used " + msg.getContentRaw());
+        if (!Boolean.parseBoolean(Config.getValue("unregistered-cmd-usage"))) {
+            if (!args[0].replace(prefix, "").equalsIgnoreCase("register")) {
+                if (!Player.isRegistered(m.getId())) {
+                    Embed reply = new Embed(EmbedType.ERROR, "Not Registered", Msg.getMsg("not-registered"), 1);
+                    msg.replyEmbeds(reply.build()).queue();
+                    return;
+                }
+            }
         }
 
         Command command = null;
@@ -115,10 +123,20 @@ public class CommandManager extends ListenerAdapter {
             }
         }
 
+        if (command == null) {
+            Embed embed = new Embed(EmbedType.ERROR, "Command not found", "Use `=help` to view all the available commands", 1);
+            msg.replyEmbeds(embed.build()).queue();
+            return;
+        }
+
         if (!checkPerms(command, m, g)) {
             Embed reply = new Embed(EmbedType.ERROR, "No Permission", Msg.getMsg("no-perms"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
+        }
+
+        if (Boolean.parseBoolean(Config.getValue("log-commands"))) {
+            System.out.println("[RankedBot] " + m.getUser() .getAsTag() + " used " + msg.getContentRaw());
         }
 
         command.execute(args, g, m, c, msg);

@@ -2,17 +2,20 @@ package com.kasp.rankedbot.instance;
 
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.Statistic;
+import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.cache.RanksCache;
 import com.kasp.rankedbot.instance.cache.ThemesCache;
-import com.kasp.rankedbot.config.Config;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Player {
 
@@ -37,14 +40,15 @@ public class Player {
     private Theme theme;
     private ArrayList<Theme> ownedThemes;
     private boolean isBanned;
-    private String bannedTill;
+    private LocalDateTime bannedTill;
+    private String banReason;
 
     public Player(String ID) {
         this.ID = ID;
 
         try {
             Yaml yaml = new Yaml();
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/players/" + ID));
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/players/" + ID + ".yml"));
 
             this.ign = data.get("name").toString();
             this.elo = Integer.parseInt(data.get("elo").toString());
@@ -97,6 +101,18 @@ public class Player {
             if (rank != r) {
                 rolestoremove.add(guild.getRoleById(r.getID()));
             }
+        }
+
+        if (isBanned) {
+            if (getBannedTill().isBefore(LocalDateTime.now())) {
+                rolestoremove.add(guild.getRoleById(Config.getValue("banned-role")));
+            }
+            else {
+                rolestoadd.add(guild.getRoleById(Config.getValue("banned-role")));
+            }
+        }
+        else {
+            rolestoremove.add(guild.getRoleById(Config.getValue("banned-role")));
         }
 
         guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
@@ -178,8 +194,32 @@ public class Player {
         return null;
     }
 
+    // boolean - was the action successful
+    public boolean ban(LocalDateTime time, String reason) {
+        if (isBanned) {
+            return false;
+        }
+
+        List<Role> banned = new ArrayList<>();
+        banned.add(RankedBot.getGuild().getRoleById(Config.getValue("banned-role")));
+
+        isBanned = true;
+
+        bannedTill = time;
+        banReason = reason;
+
+        return true;
+    }
+
+    public void unban() {
+        isBanned = false;
+        bannedTill = null;
+        banReason = null;
+        fix();
+    }
+
     public static boolean isRegistered(String ID) {
-        return new File("RankedBot/players/" + ID).exists();
+        return new File("RankedBot/players/" + ID + ".yml").exists();
     }
 
     public static void writeFile(String ID, String ign) {
@@ -421,11 +461,19 @@ public class Player {
         isBanned = banned;
     }
 
-    public String getBannedTill() {
+    public LocalDateTime getBannedTill() {
         return bannedTill;
     }
 
-    public void setBannedTill(String bannedTill) {
+    public void setBannedTill(LocalDateTime bannedTill) {
         this.bannedTill = bannedTill;
+    }
+
+    public String getBanReason() {
+        return banReason;
+    }
+
+    public void setBanReason(String banReason) {
+        this.banReason = banReason;
     }
 }

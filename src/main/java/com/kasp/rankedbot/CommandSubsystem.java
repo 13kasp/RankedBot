@@ -8,5 +8,6 @@ public enum CommandSubsystem {
     QUEUE,
     RANK,
     MAP,
-    THEME;
+    THEME,
+    MODERATION;
 }

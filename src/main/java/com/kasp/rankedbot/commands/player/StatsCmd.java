@@ -11,6 +11,8 @@ import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -59,57 +61,78 @@ public class StatsCmd extends Command {
             return;
         }
 
-        if (new File("RBW/themes/default.png").exists()) {
-            try {
-                player.fix();
+        if (Boolean.parseBoolean(Config.getValue("s-enabled"))) {
+            if (new File("RankedBot/themes/default.png").exists()) {
+                Document document = null;
+                try {
+                    document = Jsoup.connect("https://api.mineatar.io/uuid/" + player.getIgn()).get();
+                } catch (IOException ignored) {}
 
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("RankedBot/fonts/stats.otf")));
+                String skinlink;
+                if (document != null) {
+                    String UUID = document.body().text();
+                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/" + UUID;
+                }
+                else {
+                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/069a79f4-44e9-4726-a5be-fca90e38aaf5";
+                }
 
-                BufferedImage image = ImageIO.read(new File("RankedBot/themes/" + player.getTheme().getName() + ".png").toURI().toURL());
-                BufferedImage skin = ImageIO.read(new URL("https://api.mineatar.io/body/full/" + player.getIgn() + "?scale=9"));
+                try {
+                    player.fix();
 
-                Graphics2D gfx = (Graphics2D) image.getGraphics();
-                gfx.setFont(new Font("Minecraft", Font.PLAIN, 30));
-                gfx.setColor(new Color(250,250,87,255));
-                gfx.drawString(player.getElo() + "", Integer.parseInt(Config.getValue("elo-pixels").split(",")[0]), Integer.parseInt(Config.getValue("elo-pixels").split(",")[1]));
-                gfx.drawString(player.getMvp() + "", Integer.parseInt(Config.getValue("mvp-pixels").split(",")[0]), Integer.parseInt(Config.getValue("mvp-pixels").split(",")[1]));
-                gfx.drawString(games + "", Integer.parseInt(Config.getValue("games-pixels").split(",")[0]), Integer.parseInt(Config.getValue("games-pixels").split(",")[1]));
-                gfx.drawString(f.format(player.getWins() / templosses) + "", Integer.parseInt(Config.getValue("wlr-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wlr-pixels").split(",")[1]));
-                gfx.drawString(player.getWins() + "", Integer.parseInt(Config.getValue("wins-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wins-pixels").split(",")[1]));
-                gfx.drawString(player.getLosses() + "", Integer.parseInt(Config.getValue("losses-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losses-pixels").split(",")[1]));
-                gfx.drawString(player.getWinStreak() + "", Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[1]));
-                gfx.drawString(player.getLossStreak() + "", Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[1]));
-                gfx.drawString(player.getStrikes() + "", Integer.parseInt(Config.getValue("strikes-pixels").split(",")[0]), Integer.parseInt(Config.getValue("strikes-pixels").split(",")[1]));
-                gfx.drawString(player.getScored() + "", Integer.parseInt(Config.getValue("scored-pixels").split(",")[0]), Integer.parseInt(Config.getValue("scored-pixels").split(",")[1]));
+                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("RankedBot/fonts/stats.otf")));
 
-                Role role = guild.getRoleById(player.getRank().getID());
+                    BufferedImage image = ImageIO.read(new File("RankedBot/themes/" + player.getTheme().getName() + ".png").toURI().toURL());
+                    BufferedImage skin = ImageIO.read(new URL(skinlink));
 
-                gfx.setColor(role.getColor());
+                    Graphics2D gfx = (Graphics2D) image.getGraphics();
 
-                gfx.drawString(role.getName(), Integer.parseInt(Config.getValue("role-pixels").split(",")[0]), Integer.parseInt(Config.getValue("role-pixels").split(",")[1]));
+                    gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("s-text-size"))));
+                    gfx.setColor(new Color(Integer.parseInt(Config.getValue("s-values-color").split(",")[0]),
+                                            Integer.parseInt(Config.getValue("s-values-color").split(",")[1]),
+                                            Integer.parseInt(Config.getValue("s-values-color").split(",")[2])));
 
-                gfx.setFont(new Font("Minecraft", Font.PLAIN, 42));
-                gfx.setColor(Color.white);
-                gfx.drawString(player.getIgn() + "", Integer.parseInt(Config.getValue("name-pixels").split(",")[0]), Integer.parseInt(Config.getValue("name-pixels").split(",")[1]));
+                    gfx.drawString(player.getElo() + "", Integer.parseInt(Config.getValue("elo-pixels").split(",")[0]), Integer.parseInt(Config.getValue("elo-pixels").split(",")[1]));
+                    gfx.drawString(player.getMvp() + "", Integer.parseInt(Config.getValue("mvp-pixels").split(",")[0]), Integer.parseInt(Config.getValue("mvp-pixels").split(",")[1]));
+                    gfx.drawString(games + "", Integer.parseInt(Config.getValue("games-pixels").split(",")[0]), Integer.parseInt(Config.getValue("games-pixels").split(",")[1]));
+                    gfx.drawString(f.format(player.getWins() / templosses) + "", Integer.parseInt(Config.getValue("wlr-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wlr-pixels").split(",")[1]));
+                    gfx.drawString(player.getWins() + "", Integer.parseInt(Config.getValue("wins-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wins-pixels").split(",")[1]));
+                    gfx.drawString(player.getLosses() + "", Integer.parseInt(Config.getValue("losses-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losses-pixels").split(",")[1]));
+                    gfx.drawString(player.getWinStreak() + "", Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[1]));
+                    gfx.drawString(player.getLossStreak() + "", Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[1]));
+                    gfx.drawString(player.getStrikes() + "", Integer.parseInt(Config.getValue("strikes-pixels").split(",")[0]), Integer.parseInt(Config.getValue("strikes-pixels").split(",")[1]));
+                    gfx.drawString(player.getScored() + "", Integer.parseInt(Config.getValue("scored-pixels").split(",")[0]), Integer.parseInt(Config.getValue("scored-pixels").split(",")[1]));
 
-                gfx.drawImage(skin, Integer.parseInt(Config.getValue("skin-pixels").split(",")[0]), Integer.parseInt(Config.getValue("skin-pixels").split(",")[1]), null);
+                    Role role = guild.getRoleById(player.getRank().getID());
 
-                gfx.dispose();
+                    gfx.setColor(role.getColor());
 
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                ImageIO.write(image, "png", stream);
+                    gfx.drawString(role.getName(), Integer.parseInt(Config.getValue("role-pixels").split(",")[0]), Integer.parseInt(Config.getValue("role-pixels").split(",")[1]));
 
-                msg.reply("** **").addFile(stream.toByteArray(), "stats.png").queue();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (FontFormatException e) {
-                throw new RuntimeException(e);
+                    gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("ign-size"))));
+                    gfx.setColor(Color.white);
+                    gfx.drawString(player.getIgn() + "", Integer.parseInt(Config.getValue("ign-pixels").split(",")[0]), Integer.parseInt(Config.getValue("ign-pixels").split(",")[1]));
+
+                    gfx.drawImage(skin, Integer.parseInt(Config.getValue("skin-pixels").split(",")[0]), Integer.parseInt(Config.getValue("skin-pixels").split(",")[1]), null);
+
+                    gfx.dispose();
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    ImageIO.write(image, "png", stream);
+
+                    channel.sendFile(stream.toByteArray(), "stats.png").queue();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (FontFormatException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return;
             }
         }
-        else {
-            msg.replyEmbeds(statsFulLEmbed(player, games, templosses).build()).queue();
-        }
+
+        msg.replyEmbeds(statsFulLEmbed(player, games, templosses).build()).queue();
     }
 
     private Embed statsFulLEmbed(Player player, int games, double templosses) {

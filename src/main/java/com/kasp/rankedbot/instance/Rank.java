@@ -22,7 +22,7 @@ public class Rank {
 
         Yaml yaml = new Yaml();
         try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/ranks/" + ID));
+            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/ranks/" + ID + ".yml"));
 
             this.startingElo = Integer.parseInt(data.get("starting-elo").toString());
             this.endingElo = Integer.parseInt(data.get("ending-elo").toString());
