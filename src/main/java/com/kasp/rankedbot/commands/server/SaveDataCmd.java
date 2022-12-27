@@ -5,6 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.ServerStats;
 import com.kasp.rankedbot.instance.cache.GamesCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
@@ -34,6 +35,8 @@ public class SaveDataCmd extends Command {
         for (Game g : GamesCache.getGames().values()) {
             Game.writeFile(g);
         }
+
+        ServerStats.save();
 
         Embed reply = new Embed(EmbedType.ERROR, "Data saved", "All players and games data has been saved", 1);
         msg.replyEmbeds(reply.build()).queue();

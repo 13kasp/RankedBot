@@ -7,15 +7,16 @@ import java.util.Map;
 
 public class GamesCache {
 
-    private static HashMap<Integer, Game> games = new HashMap<>();
+    public static HashMap<Integer, Game> games = new HashMap<>();
 
     public static Game getGame(int number) {
         return games.get(number);
     }
 
     public static Game getGame(String channelID) {
+
         for (Game g : games.values()) {
-            if (g.getChannel().getId() == channelID) {
+            if (g.getChannel().getId().equals(channelID)) {
                 return g;
             }
         }
@@ -33,15 +34,13 @@ public class GamesCache {
         games.remove(game.getNumber());
     }
 
-    public static boolean containsGame(int number) {
-        return games.containsKey(number);
+    public static boolean containsGame(Game game) {
+        return games.containsValue(game);
     }
 
-    public static Game initializeGame(int number, Game game) {
-        if (!containsGame(number))
+    public static void initializeGame(Game game) {
+        if (!containsGame(game))
             addGame(game);
-
-        return getGame(number);
     }
 
     public static Map<Integer, Game> getGames() {

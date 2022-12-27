@@ -61,6 +61,7 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new GameInfoCmd("gameinfo", "gameinfo <number>", new String[]{"gi"}, "View info about a game", CommandSubsystem.GAME));
         commands.add(new PickCmd("pick", "pick <ID/mention>", new String[]{"p"}, "Pick a player in your game (if you're a captain)", CommandSubsystem.GAME));
         commands.add(new VoidCmd("void", "void", new String[]{"cleargame", "clear", "cg"}, "Cancel a game if you can't play it anymore", CommandSubsystem.GAME));
+        commands.add(new CallCmd("call", "call <ID/mention>", new String[]{}, "Give a player access to join your vc", CommandSubsystem.GAME));
         commands.add(new SubmitCmd("submit", "submit", new String[]{}, "Submit a game for scoring", CommandSubsystem.GAME));
         commands.add(new ScoreCmd("score", "score <number> <team> <mvp ID/mention/\"none\">", new String[]{}, "Score a game", CommandSubsystem.GAME));
         commands.add(new UndoGameCmd("undogame", "undogame <number>", new String[]{}, "Undo a scored game", CommandSubsystem.GAME));

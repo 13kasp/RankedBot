@@ -39,6 +39,7 @@ public class SubmitCmd extends Command {
         if (msg.getAttachments().size() != Integer.parseInt(Config.getValue("submitting-attachments"))) {
             Embed error = new Embed(EmbedType.ERROR, "", "You need to attach " + Config.getValue("submitting-attachments") + " screenshot(s) for proof", 1);
             msg.replyEmbeds(error.build()).queue();
+            return;
         }
 
         Game game = GamesCache.getGame(channel.getId());
@@ -76,7 +77,10 @@ public class SubmitCmd extends Command {
         scoring.addField("Team 1:", t1, true);
         scoring.addField("Team 2:", t2, true);
 
-        scoring.setImageURL(msg.getAttachments().get(0).getUrl());
+        if (msg.getAttachments().size() > 0) {
+            scoring.setImageURL(msg.getAttachments().get(0).getUrl());
+        }
+
         scoring.setDescription("Map: `" + game.getMap() + "`");
 
         channel.sendMessage("<@&" + Config.getValue("scorer-role") + ">").setEmbeds(scoring.build()).queue();

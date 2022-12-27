@@ -57,11 +57,11 @@ public class Game {
 
     public Game(List<Player> players, Queue queue) {
         guild = RankedBot.getGuild();
-        this.players = players;
+        this.players = new ArrayList<>(players);
         this.queue = queue;
 
-        RankedBot.serverStats.setGamesPlayed(RankedBot.serverStats.getGamesPlayed()+1);
-        this.number = RankedBot.serverStats.getGamesPlayed();
+        ServerStats.setGamesPlayed(ServerStats.getGamesPlayed()+1);
+        this.number = ServerStats.getGamesPlayed();
 
         this.team1 = new ArrayList<>();
         this.team2 = new ArrayList<>();
@@ -96,9 +96,9 @@ public class Game {
         guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue();
         guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue();
 
-        remainingPlayers = players;
-        remainingPlayers.remove(captain1);
-        remainingPlayers.remove(captain2);
+        this.remainingPlayers = new ArrayList<>(players);
+        this.remainingPlayers.remove(captain1);
+        this.remainingPlayers.remove(captain2);
 
         for (Player p : players) {
             channel.createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).queue();
@@ -110,7 +110,7 @@ public class Game {
             guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue();
         }
 
-        GamesCache.initializeGame(number, this);
+        GamesCache.initializeGame(this);
     }
 
     public Game(int number) {
@@ -136,21 +136,21 @@ public class Game {
 
         if (state != GameState.STARTING) {
             if (state != GameState.SCORED) {
-                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString()));
                 }
 
-                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString()));
                 }
             }
             else {
-                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString().split("=")[0]));
                     eloGain.put(team1.get(i), Integer.parseInt(data.get("team1-" + i).toString().split("=")[1]));
                 }
 
-                for (int i = 0; i < queue.getPlayers().size(); i++) {
+                for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString().split("=")[0]));
                     eloGain.put(team2.get(i), Integer.parseInt(data.get("team2-" + i).toString().split("=")[1]));
                 }
@@ -168,7 +168,7 @@ public class Game {
             this.scoredBy = guild.getMemberById(data.get("scored-by").toString());
         }
 
-        GamesCache.initializeGame(number, this);
+        GamesCache.initializeGame(this);
     }
 
     public void pickTeams() {
@@ -200,6 +200,7 @@ public class Game {
     }
 
     public void sendGameMsg() {
+
         String mentions = "";
         for (Player p : players) {
             mentions += guild.getMemberById(p.getID()).getAsMention();
@@ -247,7 +248,7 @@ public class Game {
                 embed.setDescription("You queued a casual queue meaning this game will have no impact on players' stats");
             }
 
-            embed.setDescription("do not forget to =submit after your game ends");
+            embed.setDescription("do not forget to `=submit` after your game ends");
         }
 
         channel.sendMessage(mentions).setEmbeds(embed.build()).queue();
@@ -255,6 +256,7 @@ public class Game {
 
     // bool - was the action successful or not
     public boolean pickPlayer(Player sender, Player picked) {
+
         if (state != GameState.STARTING) {
             return false;
         }

@@ -80,7 +80,7 @@ public class RankedBot {
             e.printStackTrace();
         }
 
-        serverStats = new ServerStats(Integer.parseInt(serverStatsData.get("games-played").toString()));
+        ServerStats.setGamesPlayed(Integer.parseInt(serverStatsData.get("games-played").toString()));
 
         if (new File("RankedBot/ranks").listFiles().length > 0) {
             for (File f : new File("RankedBot/ranks").listFiles()) {
@@ -151,6 +151,7 @@ public class RankedBot {
                 for (Game g : GamesCache.getGames().values()) {
                         Game.writeFile(g);
                 }
+                ServerStats.save();
                 System.out.println("- Games data successfully saved");
             }
         };
