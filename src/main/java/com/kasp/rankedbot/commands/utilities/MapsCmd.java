@@ -1,13 +1,10 @@
-package com.kasp.rankedbot.commands.server;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
-import com.kasp.rankedbot.instance.Game;
-import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.ServerStats;
-import com.kasp.rankedbot.instance.cache.GameCache;
-import com.kasp.rankedbot.instance.cache.PlayerCache;
+import com.kasp.rankedbot.instance.GameMap;
+import com.kasp.rankedbot.instance.cache.MapCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,8 +12,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class SaveDataCmd extends Command {
-    public SaveDataCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
+public class MapsCmd extends Command {
+    public MapsCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         super(command, usage, aliases, description, subsystem);
     }
 
@@ -28,17 +25,20 @@ public class SaveDataCmd extends Command {
             return;
         }
 
-        for (Player p : PlayerCache.getPlayers().values()) {
-            Player.writeFile(p.getID(), null);
+        String maps = "";
+        for (GameMap m : MapCache.getMaps().values()) {
+            maps += "**" + m.getName() + "** — `Height: " + m.getHeight() + "` (" + m.getTeam1() + " vs " + m.getTeam1() + ")\n";
         }
 
-        for (Game g : GameCache.getGames().values()) {
-            Game.writeFile(g);
+        Embed embed;
+
+        if (maps.equals("")) {
+            embed = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("no-maps"), 1);
+        }
+        else {
+            embed = new Embed(EmbedType.DEFAULT, "All maps", maps, 1);
         }
 
-        ServerStats.save();
-
-        Embed reply = new Embed(EmbedType.ERROR, "Data saved", "All players and games data has been saved", 1);
-        msg.replyEmbeds(reply.build()).queue();
+        msg.replyEmbeds(embed.build()).queue();
     }
 }

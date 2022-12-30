@@ -1,4 +1,4 @@
-package com.kasp.rankedbot.commands.theme;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
@@ -6,7 +6,7 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.ThemesCache;
+import com.kasp.rankedbot.instance.cache.ThemeCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,21 +31,21 @@ public class ThemeCmd extends Command {
 
         if (name.equals("list")) {
             String themes = "";
-            for (Theme t : ThemesCache.getThemes().values()) {
+            for (Theme t : ThemeCache.getThemes().values()) {
                 themes += "`" + t.getName() + "` ";
             }
 
-            Embed embed = new Embed(EmbedType.DEFAULT, "All themes `(" + ThemesCache.getThemes().size() + ")`", themes, 1);
+            Embed embed = new Embed(EmbedType.DEFAULT, "All themes `(" + ThemeCache.getThemes().size() + ")`", themes, 1);
             msg.replyEmbeds(embed.build()).queue();
         }
         else {
-            if (!ThemesCache.containsTheme(name)) {
+            if (!ThemeCache.containsTheme(name)) {
                 Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("theme-doesnt-exist"), 1);
                 msg.replyEmbeds(reply.build()).queue();
                 return;
             }
 
-            Theme theme = ThemesCache.getTheme(name);
+            Theme theme = ThemeCache.getTheme(name);
 
             Player player = PlayerCache.getPlayer(sender.getId());
 

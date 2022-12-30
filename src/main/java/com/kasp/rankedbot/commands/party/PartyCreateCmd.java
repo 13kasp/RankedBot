@@ -1,10 +1,12 @@
-package com.kasp.rankedbot.commands.map;
+package com.kasp.rankedbot.commands.party;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
-import com.kasp.rankedbot.instance.GameMap;
-import com.kasp.rankedbot.instance.cache.MapsCache;
+import com.kasp.rankedbot.instance.Party;
+import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.cache.PartyCache;
+import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -12,30 +14,30 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class DeleteMapCmd extends Command {
-    public DeleteMapCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
+public class PartyCreateCmd extends Command {
+    public PartyCreateCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         super(command, usage, aliases, description, subsystem);
     }
 
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
-        if (args.length != 2) {
+        if (args.length == 1) {
             Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        String name = args[1];
+        Player player = PlayerCache.getPlayer(sender.getId());
 
-        if (!MapsCache.containsMap(name)) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("map-doesnt-exist"), 1);
+        if (PartyCache.getParty(player) != null) {
+            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("already-in-party"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        GameMap.deleteFile(name);
+        new Party(player);
 
-        Embed success = new Embed(EmbedType.SUCCESS, "", Msg.getMsg("map-deleted"), 1);
-        msg.replyEmbeds(success.build()).queue();
+        Embed reply = new Embed(EmbedType.SUCCESS, "", Msg.getMsg("party-created"), 1);
+        msg.replyEmbeds(reply.build()).queue();
     }
 }

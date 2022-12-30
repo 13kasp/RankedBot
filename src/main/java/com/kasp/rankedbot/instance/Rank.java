@@ -1,6 +1,6 @@
 package com.kasp.rankedbot.instance;
 
-import com.kasp.rankedbot.instance.cache.RanksCache;
+import com.kasp.rankedbot.instance.cache.RankCache;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -33,7 +33,7 @@ public class Rank {
             throw new RuntimeException(e);
         }
 
-        RanksCache.initializeRank(ID, this);
+        RankCache.initializeRank(ID, this);
     }
 
     public static void createFile(String ID, String startingElo, String endingElo, String winElo, String loseElo, String mvpElo) {
@@ -51,7 +51,7 @@ public class Rank {
     }
 
     public static void deleteFile(String ID) {
-        RanksCache.removeRank(RanksCache.getRank(ID));
+        RankCache.removeRank(RankCache.getRank(ID));
 
         try {
             Files.deleteIfExists(Path.of("RankedBot/ranks/" + ID + ".yml"));

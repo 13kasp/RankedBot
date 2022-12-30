@@ -1,6 +1,6 @@
 package com.kasp.rankedbot.instance;
 
-import com.kasp.rankedbot.instance.cache.MapsCache;
+import com.kasp.rankedbot.instance.cache.MapCache;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -29,7 +29,7 @@ public class GameMap {
             throw new RuntimeException(e);
         }
 
-        MapsCache.initializeMap(name, this);
+        MapCache.initializeMap(name, this);
     }
 
     public static void createFile(String name, String height, String team1, String team2) {
@@ -45,7 +45,7 @@ public class GameMap {
     }
 
     public static void deleteFile(String name) {
-        MapsCache.removeMap(MapsCache.getMap(name));
+        MapCache.removeMap(MapCache.getMap(name));
 
         try {
             Files.deleteIfExists(Path.of("RankedBot/maps/" + name + ".yml"));

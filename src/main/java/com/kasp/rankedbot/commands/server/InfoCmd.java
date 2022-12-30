@@ -6,9 +6,9 @@ import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Queue;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.QueueCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -32,11 +32,11 @@ public class InfoCmd extends Command {
         Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `kasp#0675`", 1);
         embed.addField("Players", "`" + PlayerCache.getPlayers().size() + "` registered | `" + guild.getMemberCount() + "` total", true);
         int qing = 0;
-        for (Queue q : QueuesCache.getQueues().values()) {
+        for (Queue q : QueueCache.getQueues().values()) {
             qing += q.getPlayers().size();
         }
         int playing = 0;
-        for (Game g : GamesCache.getGames().values()) {
+        for (Game g : GameCache.getGames().values()) {
             playing += g.getPlayers().size();
         }
 

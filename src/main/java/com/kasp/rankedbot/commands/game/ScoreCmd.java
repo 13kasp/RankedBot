@@ -7,7 +7,7 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
@@ -34,13 +34,13 @@ public class ScoreCmd extends Command {
 
         int number = Integer.parseInt(args[1]);
 
-        if (GamesCache.getGame(number) == null) {
+        if (GameCache.getGame(number) == null) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("invalid-game"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Game game = GamesCache.getGame(number);
+        Game game = GameCache.getGame(number);
 
         if (game.getState() != GameState.SUBMITTED) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-submitted"), 1);
@@ -65,7 +65,7 @@ public class ScoreCmd extends Command {
 
         game.scoreGame(winningTeam, losingTeam, PlayerCache.getPlayer(mvpID), sender);
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "Game `#" + game.getNumber() + "` has been scored", "", 1);
+        Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` has been scored", "", 1);
 
         String team1 = "";
         for (Player p : game.getTeam1()) {
@@ -80,6 +80,10 @@ public class ScoreCmd extends Command {
         embed.addField("Team 1:", team1, false);
         embed.addField("Team 2:", team2, false);
 
+        if (!mvpID.equals("")) {
+            embed.addField("MVP", "<@" + mvpID + ">", false);
+        }
+
         embed.addField("Scored by", sender.getAsMention(), false);
 
         if (!Objects.equals(Config.getValue("scored-announcing"), null)) {
@@ -87,7 +91,5 @@ public class ScoreCmd extends Command {
         }
 
         msg.replyEmbeds(embed.build()).queue();
-
-        game.closeChannel(Integer.parseInt(Config.getValue("game-deleting-time")));
     }
 }

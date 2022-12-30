@@ -1,6 +1,6 @@
 package com.kasp.rankedbot.instance;
 
-import com.kasp.rankedbot.instance.cache.ThemesCache;
+import com.kasp.rankedbot.instance.cache.ThemeCache;
 
 public class Theme {
 
@@ -9,7 +9,7 @@ public class Theme {
     public Theme(String name) {
         this.name = name;
 
-        ThemesCache.initializeTheme(name, this);
+        ThemeCache.initializeTheme(name, this);
     }
 
     public String getName() {

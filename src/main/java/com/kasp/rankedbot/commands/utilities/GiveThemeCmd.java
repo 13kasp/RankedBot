@@ -1,4 +1,4 @@
-package com.kasp.rankedbot.commands.theme;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
@@ -6,7 +6,7 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.ThemesCache;
+import com.kasp.rankedbot.instance.cache.ThemeCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -29,13 +29,13 @@ public class GiveThemeCmd extends Command {
 
         String name = args[2];
 
-        if (!ThemesCache.containsTheme(name)) {
+        if (!ThemeCache.containsTheme(name)) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("theme-doesnt-exist"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Theme theme = ThemesCache.getTheme(name);
+        Theme theme = ThemeCache.getTheme(name);
 
         String ID = args[1].replaceAll("[^0-9]","");
 

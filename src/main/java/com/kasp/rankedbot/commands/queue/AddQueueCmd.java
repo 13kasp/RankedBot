@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.PickingMode;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Queue;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.QueueCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
@@ -41,7 +41,7 @@ public class AddQueueCmd extends Command {
             return;
         }
 
-        if (QueuesCache.containsQueue(ID)) {
+        if (QueueCache.containsQueue(ID)) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("q-already-exists"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
@@ -53,14 +53,12 @@ public class AddQueueCmd extends Command {
 
         Queue.createFile(ID, playersEachTeam, pickingMode, casual);
         new Queue(ID);
-        vc.getManager().setUserLimit(playersEachTeam * 2).queue();
 
         Embed embed = new Embed(EmbedType.SUCCESS, "✅ successfully added `" + vc.getName() + "` queue", "", 1);
         embed.addField("VC", vc.getAsMention(), true);
         embed.addField("Players in each team:", args[2], true);
         embed.addField("Sorting mode:", args[3], true);
         embed.addField("Casual queue:", casual + "", true);
-        embed.addField("IMPORTANT", "don't change the user limit on the queue vc\notherwise the bot might break", false);
         msg.replyEmbeds(embed.build()).queue();
     }
 }

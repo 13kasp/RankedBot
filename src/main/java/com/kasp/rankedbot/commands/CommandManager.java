@@ -3,24 +3,25 @@ package com.kasp.rankedbot.commands;
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.game.*;
-import com.kasp.rankedbot.commands.map.AddMapCmd;
-import com.kasp.rankedbot.commands.map.DeleteMapCmd;
-import com.kasp.rankedbot.commands.map.MapsCmd;
+import com.kasp.rankedbot.commands.party.*;
+import com.kasp.rankedbot.commands.utilities.AddMapCmd;
+import com.kasp.rankedbot.commands.utilities.DeleteMapCmd;
+import com.kasp.rankedbot.commands.utilities.MapsCmd;
 import com.kasp.rankedbot.commands.moderation.*;
 import com.kasp.rankedbot.commands.player.*;
 import com.kasp.rankedbot.commands.queue.AddQueueCmd;
 import com.kasp.rankedbot.commands.queue.DeleteQueueCmd;
 import com.kasp.rankedbot.commands.queue.QueuesCmd;
-import com.kasp.rankedbot.commands.rank.AddRankCmd;
-import com.kasp.rankedbot.commands.rank.DeleteRankCmd;
-import com.kasp.rankedbot.commands.rank.RanksCmd;
+import com.kasp.rankedbot.commands.utilities.AddRankCmd;
+import com.kasp.rankedbot.commands.utilities.DeleteRankCmd;
+import com.kasp.rankedbot.commands.utilities.RanksCmd;
 import com.kasp.rankedbot.commands.server.HelpCmd;
 import com.kasp.rankedbot.commands.server.InfoCmd;
 import com.kasp.rankedbot.commands.server.ReloadConfigCmd;
 import com.kasp.rankedbot.commands.server.SaveDataCmd;
-import com.kasp.rankedbot.commands.theme.GiveThemeCmd;
-import com.kasp.rankedbot.commands.theme.RemoveThemeCmd;
-import com.kasp.rankedbot.commands.theme.ThemeCmd;
+import com.kasp.rankedbot.commands.utilities.GiveThemeCmd;
+import com.kasp.rankedbot.commands.utilities.RemoveThemeCmd;
+import com.kasp.rankedbot.commands.utilities.ThemeCmd;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.embed.Embed;
@@ -56,6 +57,14 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new ModifyCmd("modify", "modify <ID/mention> <statistic> <value>", new String[]{"edit"}, "Modify player's stats", CommandSubsystem.PLAYER));
         commands.add(new ScreenshareCmd("screenshare", "screenshare <ID/mention> <reason>", new String[]{"ss"}, "Screenshare a player", CommandSubsystem.PLAYER));
 
+        commands.add(new PartyCreateCmd("partycreate", "partycreate", new String[]{"pc", "partyc"}, "Create a party", CommandSubsystem.PARTY));
+        commands.add(new PartyInviteCmd("partyinvite", "partyinvite <ID/mention>", new String[]{"pi", "partyi"}, "Invite a player to your party", CommandSubsystem.PARTY));
+        commands.add(new PartyJoinCmd("partyjoin", "partyjoin <ID/mention>", new String[]{"pj", "partyj"}, "Join a player's party", CommandSubsystem.PARTY));
+        commands.add(new PartyLeaveCmd("partyleave", "partyleave", new String[]{"pl", "partyl"}, "Leave your current party or disband it if you're the leader", CommandSubsystem.PARTY));
+        commands.add(new PartyPromoteCmd("partypromote", "partypromote <ID/metion>", new String[]{"pp", "partyp"}, "Promote a player in your party to party leader", CommandSubsystem.PARTY));
+        commands.add(new PartyWarpCmd("partywarp", "partywarp", new String[]{"pw", "partyw"}, "Warp your party to your current vc (warps a member only if that member is in any vc)", CommandSubsystem.PARTY));
+        commands.add(new PartyListCmd("partylist", "partylist [ID/mention]", new String[]{"pli", "partyli"}, "View info about your or someone else's party", CommandSubsystem.PARTY));
+
         commands.add(new QueueCmd("queue", "queue", new String[]{"q"}, "View your game's queue", CommandSubsystem.GAME));
         commands.add(new QueueStatsCmd("queuestats", "queuestats", new String[]{"qs"}, "View your game's queue stats", CommandSubsystem.GAME));
         commands.add(new GameInfoCmd("gameinfo", "gameinfo <number>", new String[]{"gi"}, "View info about a game", CommandSubsystem.GAME));
@@ -72,17 +81,15 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new DeleteQueueCmd("deletequeue", "deletequeue <vc ID>", new String[]{"delq", "delqueue"}, "Delete a ranked/casual queue", CommandSubsystem.QUEUE));
         commands.add(new QueuesCmd("queues", "queues", new String[]{}, "View info about all server queues and some info about them", CommandSubsystem.QUEUE));
 
-        commands.add(new AddRankCmd("addrank", "addrank <role ID/mention> <starting elo> <ending elo> <win elo> <lose elo> <mvp elo>", new String[]{"addr"}, "Add a rank", CommandSubsystem.RANK));
-        commands.add(new DeleteRankCmd("deleterank", "deleterank <role ID/mention>", new String[]{"delr", "delrank"}, "Delete a rank", CommandSubsystem.RANK));
-        commands.add(new RanksCmd("ranks", "ranks", new String[]{}, "View all ranks and info about them", CommandSubsystem.RANK));
-
-        commands.add(new AddMapCmd("addmap", "addmap <name> <height> <team1> <team2>", new String[]{"addm"}, "Add an in-game map", CommandSubsystem.MAP));
-        commands.add(new DeleteMapCmd("deletemap", "deletemap <name>", new String[]{"delm", "delmap"}, "Delete an in-game map", CommandSubsystem.MAP));
-        commands.add(new MapsCmd("maps", "maps", new String[]{}, "View all maps and info about them", CommandSubsystem.MAP));
-
-        commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "Give specified player access to a theme", CommandSubsystem.THEME));
-        commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "Remove specified player's access to a theme", CommandSubsystem.THEME));
-        commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "Select a theme or use \"list\" to view all themes", CommandSubsystem.THEME));
+        commands.add(new AddRankCmd("addrank", "addrank <role ID/mention> <starting elo> <ending elo> <win elo> <lose elo> <mvp elo>", new String[]{"addr"}, "Add a rank", CommandSubsystem.UTILITIES));
+        commands.add(new DeleteRankCmd("deleterank", "deleterank <role ID/mention>", new String[]{"delr", "delrank"}, "Delete a rank", CommandSubsystem.UTILITIES));
+        commands.add(new RanksCmd("ranks", "ranks", new String[]{}, "View all ranks and info about them", CommandSubsystem.UTILITIES));
+        commands.add(new AddMapCmd("addmap", "addmap <name> <height> <team1> <team2>", new String[]{"addm"}, "Add an in-game map", CommandSubsystem.UTILITIES));
+        commands.add(new DeleteMapCmd("deletemap", "deletemap <name>", new String[]{"delm", "delmap"}, "Delete an in-game map", CommandSubsystem.UTILITIES));
+        commands.add(new MapsCmd("maps", "maps", new String[]{}, "View all maps and info about them", CommandSubsystem.UTILITIES));
+        commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "Give specified player access to a theme", CommandSubsystem.UTILITIES));
+        commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "Remove specified player's access to a theme", CommandSubsystem.UTILITIES));
+        commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "Select a theme or use \"list\" to view all themes", CommandSubsystem.UTILITIES));
 
         commands.add(new Ban("ban", "ban <ID/mention> <time> <reason>", new String[]{}, "Ban a player from queueing", CommandSubsystem.MODERATION));
         commands.add(new Unban("unban", "unban <ID/mention>", new String[]{}, "Unban a banned player", CommandSubsystem.MODERATION));

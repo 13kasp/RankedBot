@@ -4,8 +4,8 @@ import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.Statistic;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.RanksCache;
-import com.kasp.rankedbot.instance.cache.ThemesCache;
+import com.kasp.rankedbot.instance.cache.RankCache;
+import com.kasp.rankedbot.instance.cache.ThemeCache;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -67,13 +67,13 @@ public class Player {
             this.gold = Integer.parseInt(data.get("gold").toString());
             this.level = Integer.parseInt(data.get("level").toString());
             this.xp = Integer.parseInt(data.get("xp").toString());
-            this.theme = ThemesCache.getTheme(data.get("theme").toString());
+            this.theme = ThemeCache.getTheme(data.get("theme").toString());
 
             ownedThemes = new ArrayList<>();
 
             String[] themes = data.get("owned-themes").toString().split(",");
             for (String s : themes) {
-                ownedThemes.add(ThemesCache.getTheme(s));
+                ownedThemes.add(ThemeCache.getTheme(s));
             }
 
             this.isBanned = Boolean.parseBoolean(data.get("is-banned").toString());
@@ -82,7 +82,7 @@ public class Player {
             e.printStackTrace();
         }
 
-        PlayerCache.initializePlayer(ID, this);
+        PlayerCache.initializePlayer(this);
     }
 
     public void fix() {
@@ -97,7 +97,7 @@ public class Player {
         Rank rank = getRank();
         rolestoadd.add(guild.getRoleById(rank.getID()));
 
-        for (Rank r : RanksCache.getRanks().values()) {
+        for (Rank r : RankCache.getRanks().values()) {
             if (rank != r) {
                 rolestoremove.add(guild.getRoleById(r.getID()));
             }
@@ -185,7 +185,7 @@ public class Player {
     }
 
     public Rank getRank() {
-        for (Rank r : RanksCache.getRanks().values()) {
+        for (Rank r : RankCache.getRanks().values()) {
             if (elo >= r.getStartingElo() && elo <= r.getEndingElo()) {
                 return r;
             }
@@ -200,13 +200,12 @@ public class Player {
             return false;
         }
 
-        List<Role> banned = new ArrayList<>();
-        banned.add(RankedBot.getGuild().getRoleById(Config.getValue("banned-role")));
-
         isBanned = true;
 
         bannedTill = time;
         banReason = reason;
+
+        fix();
 
         return true;
     }
@@ -216,6 +215,15 @@ public class Player {
         bannedTill = null;
         banReason = null;
         fix();
+    }
+
+    public void joinParty(Party party) {
+        party.getMembers().add(this);
+        party.getInvitedPlayers().remove(this);
+    }
+
+    public void leaveParty(Party party) {
+        party.getMembers().remove(this);
     }
 
     public static boolean isRegistered(String ID) {

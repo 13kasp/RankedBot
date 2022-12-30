@@ -27,7 +27,6 @@ public class ForceRenameCmd extends Command {
 
         String ID = args[1].replaceAll("[^0-9]", "");
 
-
         if (!Player.isRegistered(ID)) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("player-not-registered"), 1);
             msg.replyEmbeds(reply.build()).queue();

@@ -5,7 +5,7 @@ import com.kasp.rankedbot.instance.Queue;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueuesCache {
+public class QueueCache {
 
     private static HashMap<String, Queue> queues = new HashMap<>();
 

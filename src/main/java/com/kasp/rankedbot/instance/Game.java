@@ -5,10 +5,7 @@ import com.kasp.rankedbot.GameState;
 import com.kasp.rankedbot.PickingMode;
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.config.Config;
-import com.kasp.rankedbot.instance.cache.GamesCache;
-import com.kasp.rankedbot.instance.cache.MapsCache;
-import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.*;
 import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -51,6 +48,8 @@ public class Game {
     private Player mvp;
     private Member scoredBy; // this acts as voidedBy if game was voided
 
+    private TimerTask closingTask;
+
     // IF THE GAME WAS SCORED
 
     private HashMap<Player, Integer> eloGain; // used for =undogame
@@ -70,7 +69,7 @@ public class Game {
 
         this.casual = queue.isCasual();
 
-        List<GameMap> maps = new ArrayList<>(MapsCache.getMaps().values());
+        List<GameMap> maps = new ArrayList<>(MapCache.getMaps().values());
         Collections.shuffle(maps);
         this.map = maps.get(0);
 
@@ -82,23 +81,25 @@ public class Game {
         vc2 = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "2")).setUserlimit(queue.getPlayersEachTeam()).complete();
 
         Collections.shuffle(players);
-        this.captain1 = players.get(0);
-        this.captain2 = players.get(1);
-
-        currentCaptain = captain1;
-        if (captain1.getElo() > captain2.getElo()) {
-            currentCaptain = captain2;
-        }
-
-        this.team1.add(captain1);
-        this.team2.add(captain2);
-
-        guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue();
-        guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue();
-
         this.remainingPlayers = new ArrayList<>(players);
-        this.remainingPlayers.remove(captain1);
-        this.remainingPlayers.remove(captain2);
+
+        if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
+            this.captain1 = players.get(0);
+            this.captain2 = players.get(1);
+
+            currentCaptain = captain1;
+            if (captain1.getElo() > captain2.getElo()) {
+                currentCaptain = captain2;
+            }
+
+            this.team1.add(captain1);
+            this.team2.add(captain2);
+
+            guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue();
+            guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue();
+            this.remainingPlayers.remove(captain1);
+            this.remainingPlayers.remove(captain2);
+        }
 
         for (Player p : players) {
             channel.createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).queue();
@@ -110,7 +111,7 @@ public class Game {
             guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue();
         }
 
-        GamesCache.initializeGame(this);
+        GameCache.initializeGame(this);
     }
 
     public Game(int number) {
@@ -128,11 +129,11 @@ public class Game {
 
         this.state = GameState.valueOf(data.get("state").toString().toUpperCase());
         this.casual = Boolean.parseBoolean(data.get("casual").toString());
-        this.map = MapsCache.getMap(data.get("map").toString());
+        this.map = MapCache.getMap(data.get("map").toString());
         this.channel = guild.getTextChannelById(data.get("channel-id").toString());
         this.vc1 = guild.getVoiceChannelById(data.get("vc1-id").toString());
         this.vc2 = guild.getVoiceChannelById(data.get("vc2-id").toString());
-        this.queue = QueuesCache.getQueue(data.get("queue").toString());
+        this.queue = QueueCache.getQueue(data.get("queue").toString());
 
         if (state != GameState.STARTING) {
             if (state != GameState.SCORED) {
@@ -168,15 +169,44 @@ public class Game {
             this.scoredBy = guild.getMemberById(data.get("scored-by").toString());
         }
 
-        GamesCache.initializeGame(this);
+        GameCache.initializeGame(this);
     }
 
     public void pickTeams() {
         if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
-            for (int i = 0; i < queue.getPlayersEachTeam() * 2 - 2; i+=2) {
-                this.team1.add(remainingPlayers.get(i));
-                this.team2.add(remainingPlayers.get(i+1));
+
+            // check for any parties
+            List<Party> parties = new ArrayList<>();
+            for (Player p : remainingPlayers) {
+                if (PartyCache.getParty(p) != null) {
+                    if (!parties.contains(PartyCache.getParty(p))) {
+                        parties.add(PartyCache.getParty(p));
+                    }
+                }
             }
+
+            if (parties.size() > 0) {
+                for (Party p : parties) {
+                    if (queue.getPlayersEachTeam() - team1.size() >= p.getMembers().size()) {
+                        team1.addAll(p.getMembers());
+                    }
+                    else if (queue.getPlayersEachTeam() - team2.size() >= p.getMembers().size()) {
+                        team2.addAll(p.getMembers());
+                    }
+                    remainingPlayers.removeAll(p.getMembers());
+                }
+            }
+
+            Collections.shuffle(remainingPlayers);
+            for (Player p : remainingPlayers) {
+                if (queue.getPlayersEachTeam() - team1.size() > 0) {
+                    team1.add(p);
+                }
+                else {
+                    team2.add(p);
+                }
+            }
+            remainingPlayers.clear();
 
             start();
         }
@@ -350,6 +380,8 @@ public class Game {
 
         Player player = PlayerCache.getPlayer(scoredBy.getId());
         player.setScored(player.getScored() + 1);
+
+        closeChannel(Integer.parseInt(Config.getValue("game-deleting-time")));
     }
 
     public void undo() {
@@ -380,14 +412,18 @@ public class Game {
         Embed embed = new Embed(EmbedType.DEFAULT, "", "Game channel deleting in `" + timeSeconds + "` seconds / `" + timeSeconds / 60 + "` minutes", 1);
         channel.sendMessageEmbeds(embed.build()).queue();
 
-        TimerTask task = new TimerTask() {
+        if (closingTask != null) {
+            closingTask.cancel();
+        }
+
+        closingTask = new TimerTask() {
             @Override
             public void run() {
                 channel.delete().queue();
             }
         };
 
-        new Timer().schedule(task, timeSeconds * 1000L);
+        new Timer().schedule(closingTask, timeSeconds * 1000L);
     }
 
     public static void writeFile(Game g) {

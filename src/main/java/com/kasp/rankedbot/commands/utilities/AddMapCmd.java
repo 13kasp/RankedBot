@@ -1,10 +1,10 @@
-package com.kasp.rankedbot.commands.map;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.GameMap;
-import com.kasp.rankedbot.instance.cache.MapsCache;
+import com.kasp.rankedbot.instance.cache.MapCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -30,7 +30,7 @@ public class AddMapCmd extends Command {
         String team1 = args[3];
         String team2 = args[4];
 
-        if (MapsCache.containsMap(name)) {
+        if (MapCache.containsMap(name)) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("map-already-exists"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;

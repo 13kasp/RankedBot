@@ -3,7 +3,7 @@ package com.kasp.rankedbot;
 import com.kasp.rankedbot.commands.CommandManager;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.*;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.PagesEvents;
 import com.kasp.rankedbot.listener.QueueJoin;
@@ -148,7 +148,7 @@ public class RankedBot {
                     Player.writeFile(p.getID(), null);
                 }
                 System.out.println("- Players data successfully saved");
-                for (Game g : GamesCache.getGames().values()) {
+                for (Game g : GameCache.getGames().values()) {
                         Game.writeFile(g);
                 }
                 ServerStats.save();

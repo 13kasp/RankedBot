@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,13 +26,13 @@ public class QueueStatsCmd extends Command {
             return;
         }
 
-        if (GamesCache.getGame(channel.getId()) == null) {
+        if (GameCache.getGame(channel.getId()) == null) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-game-channel"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Game game = GamesCache.getGame(channel.getId());
+        Game game = GameCache.getGame(channel.getId());
 
         String t1 = "";
         for (Player p : game.getTeam1()) {

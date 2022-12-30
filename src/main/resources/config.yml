@@ -105,6 +105,20 @@ submitting-attachments: 1
 # Role to ping when game gets submitted
 scorer-role: 947231507343364097
 
+#============================== PARTY
+
+# you can disable parties by simply disabling every command in permissions.yml
+# keep in mind parties only work in automatic queues
+
+# after how many minutes party invite expires
+invite-expiration: 3
+
+# how many members maximum can a party have
+max-party-members: 3
+
+# how much elo maximum can party members have combined
+max-party-elo: 1800
+
 #============================== STATS IMAGE(S)
 
 s-enabled: true

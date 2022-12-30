@@ -5,7 +5,7 @@ import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Queue;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.QueueCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
@@ -20,11 +20,11 @@ public class QueueJoin extends ListenerAdapter {
 
         // leave vc
         if (event.getChannelJoined() != null) {
-            if (QueuesCache.containsQueue(event.getChannelJoined().getId())) {
+            if (QueueCache.containsQueue(event.getChannelJoined().getId())) {
                 TextChannel alerts = event.getGuild().getTextChannelById(Config.getValue("alerts-channel"));
 
                 String ID = event.getMember().getId();
-                Queue queue = QueuesCache.getQueue(event.getChannelJoined().getId());
+                Queue queue = QueueCache.getQueue(event.getChannelJoined().getId());
 
                 Player player = PlayerCache.getPlayer(ID);
 
@@ -42,9 +42,9 @@ public class QueueJoin extends ListenerAdapter {
         }
         // left vc
         if (event.getChannelLeft() != null) {
-            if (QueuesCache.containsQueue(event.getChannelLeft().getId())) {
+            if (QueueCache.containsQueue(event.getChannelLeft().getId())) {
                 String ID = event.getMember().getId();
-                Queue queue = QueuesCache.getQueue(event.getChannelLeft().getId());
+                Queue queue = QueueCache.getQueue(event.getChannelLeft().getId());
 
                 Player player = PlayerCache.getPlayer(ID);
 

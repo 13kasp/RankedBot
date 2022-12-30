@@ -5,7 +5,7 @@ import com.kasp.rankedbot.instance.Theme;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ThemesCache {
+public class ThemeCache {
 
     private static HashMap<String, Theme> themes = new HashMap<>();
 

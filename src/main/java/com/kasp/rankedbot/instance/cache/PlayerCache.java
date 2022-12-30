@@ -23,15 +23,13 @@ public class PlayerCache {
         players.remove(player.getID());
     }
 
-    public static boolean containsPlayer(String ID) {
-        return players.containsKey(ID);
+    public static boolean containsPlayer(Player player) {
+        return players.containsValue(player);
     }
 
-    public static Player initializePlayer(String ID, Player player) {
-        if (!containsPlayer(ID))
+    public static void initializePlayer(Player player) {
+        if (!containsPlayer(player))
             addPlayer(player);
-
-        return getPlayer(ID);
     }
 
     public static Map<String, Player> getPlayers() {

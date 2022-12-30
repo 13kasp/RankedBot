@@ -8,8 +8,8 @@ import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Queue;
-import com.kasp.rankedbot.instance.cache.GamesCache;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
+import com.kasp.rankedbot.instance.cache.QueueCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -30,7 +30,7 @@ public class SubmitCmd extends Command {
             return;
         }
 
-        if (GamesCache.getGame(channel.getId()) == null) {
+        if (GameCache.getGame(channel.getId()) == null) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-game-channel"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
@@ -42,7 +42,13 @@ public class SubmitCmd extends Command {
             return;
         }
 
-        Game game = GamesCache.getGame(channel.getId());
+        Game game = GameCache.getGame(channel.getId());
+
+        if (game.getState() != GameState.PLAYING) {
+            Embed error = new Embed(EmbedType.ERROR, "", "You cannot perform this command in the current state of the game", 1);
+            msg.replyEmbeds(error.build()).queue();
+            return;
+        }
 
         if (game.isCasual()) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("casual-game"), 1);
@@ -53,7 +59,7 @@ public class SubmitCmd extends Command {
         Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` submitted", "", 1);
 
         String queues = "";
-        for (Queue q : QueuesCache.getQueues().values()) {
+        for (Queue q : QueueCache.getQueues().values()) {
             queues += "<#" + q.getID() + ">\n";
         }
         embed.addField("Requeue here:", queues, false);
@@ -65,7 +71,7 @@ public class SubmitCmd extends Command {
 
         game.setState(GameState.SUBMITTED);
 
-        Embed scoring = new Embed(EmbedType.DEFAULT, "Game`#" + game.getNumber() + "` Scoring", "", 1);
+        Embed scoring = new Embed(EmbedType.DEFAULT, "Game `#" + game.getNumber() + "` Scoring", "", 1);
 
         String t1 = "";
         String t2 = "";
@@ -81,7 +87,7 @@ public class SubmitCmd extends Command {
             scoring.setImageURL(msg.getAttachments().get(0).getUrl());
         }
 
-        scoring.setDescription("Map: `" + game.getMap() + "`");
+        scoring.setDescription("Map: `" + game.getMap().getName() + "`\n\nPlease use `=score` to score this game");
 
         channel.sendMessage("<@&" + Config.getValue("scorer-role") + ">").setEmbeds(scoring.build()).queue();
     }

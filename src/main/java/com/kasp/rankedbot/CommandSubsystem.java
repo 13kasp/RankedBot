@@ -4,10 +4,9 @@ public enum CommandSubsystem {
 
     SERVER,
     PLAYER,
+    PARTY,
     GAME,
     QUEUE,
-    RANK,
-    MAP,
-    THEME,
+    UTILITIES,
     MODERATION;
 }

@@ -1,12 +1,12 @@
-package com.kasp.rankedbot.commands.theme;
+package com.kasp.rankedbot.commands.party;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.instance.Party;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.Theme;
+import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.ThemesCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -14,42 +14,43 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class RemoveThemeCmd extends Command {
-    public RemoveThemeCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
+public class PartyWarpCmd extends Command {
+    public PartyWarpCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
         super(command, usage, aliases, description, subsystem);
     }
 
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
-        if (args.length != 3) {
+        if (args.length != 1) {
             Embed reply = new Embed(EmbedType.ERROR, "Invalid Arguments", Msg.getMsg("wrong-usage").replaceAll("%usage%", getUsage()), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        String name = args[2];
+        Player player = PlayerCache.getPlayer(sender.getId());
 
-        if (!ThemesCache.containsTheme(name)) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("theme-doesnt-exist"), 1);
+        if (PartyCache.getParty(player) == null) {
+            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-in-party"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Theme theme = ThemesCache.getTheme(name);
+        Party party = PartyCache.getParty(player);
 
-        String ID = args[1].replaceAll("[^0-9]", "");
-
-        Player player = PlayerCache.getPlayer(ID);
-
-        if (!player.getOwnedThemes().contains(theme)) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("doesnt-have-theme"), 1);
+        if (party.getLeader() != player) {
+            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-party-leader"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        player.getOwnedThemes().remove(theme);
+        String warped = "";
+        for (Player p : party.getInvitedPlayers()) {
+            if (guild.getMemberById(p.getID()).getVoiceState() != null) {
+                warped += "<@" + p.getID() + "> ";
+            }
+        }
 
-        Embed embed = new Embed(EmbedType.SUCCESS, "", "You have removed `" + theme.getName() + "` theme from " + guild.getMemberById(ID).getAsMention(), 1);
+        Embed embed = new Embed(EmbedType.SUCCESS, "", "Warped " + warped + " to your vc", 1);
         msg.replyEmbeds(embed.build()).queue();
     }
 }

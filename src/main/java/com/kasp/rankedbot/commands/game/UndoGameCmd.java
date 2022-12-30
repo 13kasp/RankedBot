@@ -6,7 +6,7 @@ import com.kasp.rankedbot.GameState;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Game;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,13 +31,13 @@ public class UndoGameCmd extends Command {
 
         int number = Integer.parseInt(args[1]);
 
-        if (GamesCache.getGame(number) == null) {
+        if (GameCache.getGame(number) == null) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("invalid-game"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Game game = GamesCache.getGame(number);
+        Game game = GameCache.getGame(number);
 
         if (game.getState() != GameState.SCORED) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-scored"), 1);

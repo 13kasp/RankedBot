@@ -5,7 +5,7 @@ import com.kasp.rankedbot.instance.Rank;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RanksCache {
+public class RankCache {
 
     private static HashMap<String, Rank> ranks = new HashMap<>();
 

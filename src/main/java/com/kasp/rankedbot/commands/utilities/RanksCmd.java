@@ -1,10 +1,10 @@
-package com.kasp.rankedbot.commands.rank;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Rank;
-import com.kasp.rankedbot.instance.cache.RanksCache;
+import com.kasp.rankedbot.instance.cache.RankCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
@@ -28,7 +28,7 @@ public class RanksCmd extends Command {
 
         List<String> ranks = new ArrayList<>();
 
-        for (Rank r : RanksCache.getRanks().values()) {
+        for (Rank r : RankCache.getRanks().values()) {
             ranks.add("<@&" + r.getID() + "> {" + r.getStartingElo() + "} - " + r.getEndingElo() + "** `+" + r.getWinElo() + " / -" + r.getLoseElo() + "` MVP: " + r.getMvpElo() + "");
         }
 

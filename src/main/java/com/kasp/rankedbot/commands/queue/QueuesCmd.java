@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Queue;
-import com.kasp.rankedbot.instance.cache.QueuesCache;
+import com.kasp.rankedbot.instance.cache.QueueCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -27,7 +27,7 @@ public class QueuesCmd extends Command {
             return;
         }
 
-        if (QueuesCache.getQueues().size() < 1) {
+        if (QueueCache.getQueues().size() < 1) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", "There are currently no queues created. Add one using `=addqueue`!", 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
@@ -35,7 +35,7 @@ public class QueuesCmd extends Command {
 
         Embed embed = new Embed(EmbedType.DEFAULT, "All server queues", "this also shows **currently** queueing players", 1);
 
-        for (Queue q : QueuesCache.getQueues().values()) {
+        for (Queue q : QueueCache.getQueues().values()) {
 
             String content = "There are currently no players playing";
             if (q.getPlayers().size() > 0) {

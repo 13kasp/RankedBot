@@ -6,7 +6,7 @@ import com.kasp.rankedbot.GameState;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.cache.GamesCache;
+import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -29,13 +29,13 @@ public class GameInfoCmd extends Command {
 
         int number = Integer.parseInt(args[1]);
 
-        if (GamesCache.getGame(number) == null) {
+        if (GameCache.getGame(number) == null) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("invalid-game"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
         }
 
-        Game game = GamesCache.getGame(number);
+        Game game = GameCache.getGame(number);
 
         String t1 = "";
         for (Player p : game.getTeam1()) {
@@ -62,9 +62,9 @@ public class GameInfoCmd extends Command {
         embed.addField("Casual", String.valueOf(game.isCasual()), true);
 
         if (game.getState() == GameState.VOIDED) {
-            embed.addField("Voided By", "<@" + game.getScoredBy() + ">", true);
+            embed.addField("Voided By", "<@" + game.getScoredBy().getId() + ">", true);
         } else if (game.getState() == GameState.SCORED) {
-            embed.addField("Scored By", "<@" + game.getScoredBy() + ">", true);
+            embed.addField("Scored By", "<@" + game.getScoredBy().getId() + ">", true);
         }
 
         msg.replyEmbeds(embed.build()).queue();

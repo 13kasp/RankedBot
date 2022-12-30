@@ -11,131 +11,66 @@ invalid-vc: "That voice channel is not found (wrong ID?)"
 invalid-game: "This game does not exist (wrong number?)"
 not-game-channel: "You can use this command only in game channels"
 
-# =register
+# player
 already-registered: "You are already registered"
 ign-too-long: "Max character limit when registering is 16 characters"
 successfully-registered: "You have successfully registered, have fun playing!"
+successfully-wiped: "You have successfully wiped the player's stats"
+player-already-registered: "The player you're trying to register is already registered"
+player-not-registered: "The player you're trying to rename is not registered (=forceregister)"
+ss-self: "You cannot SS yourself"
 
-# =getplayerfile
-player-file-sent: "Here is the file. You can apply changes by using =setplayerfile and attaching the edited file"
-
-# =setplayerfile
-player-file-uploaded: "You have successfully set the new player stats"
-player-no-attachments: "You need to attach a file w the new stats"
-player-wrong-file: "The file's extension must be .yml (wrong file?)"
-
-# =addrank
+# rank
 rank-already-exists: "This rank already exists"
-
-# =delrank
 rank-doesnt-exist: "This rank doesn't exist"
 rank-deleted: "The rank was successfully deleted"
-
-# =ranks
 no-ranks: "There are currently no ranks set up"
 
-# =getrankfile
-rank-file-sent: "Here is the file. You can apply changes by using =setrankfile and attaching the edited file"
-
-# =setrankfile
-rank-file-uploaded: "You have successfully set the new rank settings"
-rank-no-attachments: "you need to attach a file w the new settings"
-rank-wrong-file: "The file's extension must be .yml (wrong file?)"
-
-# =maps
+# map
 no-maps: "There are currently no maps set up"
-
-# =addmap
 map-already-exists: "This map already exists"
-
-# =delmap
 map-doesnt-exist: "This map doesn't exist"
 map-deleted: "The map was successfully deleted"
 
-# =getrankfile
-mapfile-doesnt-exist: "This map was not found (wrong name?)"
-map-file-sent: "Here is the file. You can apply changes by using =setmapfile and attaching the edited file"
-
-# =setmapfile
-map-file-uploaded: "You have successfully set the new map settings"
-map-no-attachments: "You need to attach a file w the new settings"
-map-wrong-file: "The file's extension must be .yml (wrong file?)"
-
-# =addqueue
+# queue
 q-more-players: "Players in one team must be 1 or more"
 q-already-exists: "This queue already exists"
 q-invalid-mode: "Invalid teams sorting mode. must be `captains` or `automatic`"
-q-causal: "The parameter should be `true` or `false`"
-
-# =delqueue
+q-casual: "The parameter should be `true` or `false`"
 q-doesnt-exist: "This queue doesn't exist"
 q-deleted: "The queue was successfully deleted"
 
-# =getqueuefile
-q-file-sent: "Here is the file. You can apply changes by using =setqueuefile and attaching the edited file"
-
-# =setqueuefile
-q-file-uploaded: "You have successfully set the new queue settings"
-q-no-attachments: "you need to attach a file w the new settings"
-q-wrong-file: "The file's extension must be .yml (wrong file?)"
-
-# =ban
+# moderation
 incorrect-time-format: "you need to specify the time correctly (m for mins, h for hours, d for days)"
 banned-role-not-set: "Please set the banned role in `config.yml`"
-
-# =unban and =baninfo
 player-not-banned: "This player isn't banned"
 player-unbanned: "Successfully unbanned specified player"
 
-# =bans
-no-bans-found: "No bans found"
-
-# =wipe
-successfully-wiped: "You have successfully wiped the player's stats"
-
-# =forceregister
-player-already-registered: "The player you're trying to register is already registered"
-
-# =forcerename
-player-not-registered: "The player you're trying to rename is not registered (=forceregister)"
-
-# =ss
-ss-self: "You cannot SS yourself"
-ssreq-channel-invalid: "please specify where can people send ss requests in `config.yml`"
-frozen-role-invalid: "please specify frozen role in `config.yml`"
-
-# =pick
+# game
 game-started: "This game has already started"
 not-captain: "You aren't a captain"
 picked-yourself: "You cannot pick yourself"
-
-# =queue, =queuestats and # =void
-game-starting: "You cannot use this right now because the game is still starting"
-game-scored: "This game has been scored (use `=undogame`)"
-
-# =submit
 casual-game: "You cannot submit because this game is casual"
-
-# =score
 not-submitted: "This game is not submitted (`=gameinfo`)"
-
-# =undogame
 not-scored: "You cannot undo this game because it hasn't been scored"
 
-# =addtheme
-wrong-resolution: "The attached image has to be `960x540` resolution `(50% of 1920x1080)`"
-wrong-extension: "The attached image must be a `.png` file"
-theme-already-exists: "This theme already exists (same name)"
-
-# =deltheme, =theme
-theme-doesnt-exist: "This theme doesnt exist (wrong name?)"
-theme-deleted: "The theme has been successfully deleted"
-
-# =givetheme
+# theme
 already-has-theme: "This player already has the theme"
-
-# =removetheme
 doesnt-have-theme: "This player doesn't have the theme"
-
-# =theme
 theme-access-denied: "You don't own this theme"
+
+# party
+already-in-party: "You're already in a party. You can use `=pl` to leave it"
+not-in-party: "You're not in any party. Use `=pc` to create one"
+party-created: "You've successfully created a party. You can invite players by using `=pi <ID/mention>`"
+not-party-leader: "You're not the leader of this party. Use `=pli` to view info about your party"
+player-already-invited: "This player is already invited"
+not-invited: "You're not invited to join this party or your invite has expired"
+player-not-in-party: "This player is not in any party"
+joined-party: "You have successfully joined the party"
+party-left: "You've left your party"
+party-disbanded: "Your party has been disbanded"
+your-party-disbanded: "The party you were in was disbanded meaning you are no longer in a party"
+party-full: "Your party is already full"
+this-party-full: "This party is already full"
+player-not-in-your-party: "This player isn't in your party"
