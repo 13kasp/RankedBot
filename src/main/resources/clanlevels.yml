@@ -1,0 +1,14 @@
+# required xp to reach a certain level
+# clans start at level 0, you can add as many levels as u want just set the total number below and add "l" before every level (like it is rn)
+total-levels: 10
+
+l1: 1000
+l2: 3000
+l3: 5000
+l4: 7500
+l5: 10000
+l6: 20000
+l7: 35000
+l8: 50000
+l9: 70000
+l10: 100000

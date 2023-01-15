@@ -1,11 +1,11 @@
 package com.kasp.rankedbot.instance;
 
+import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.Statistic;
 import com.kasp.rankedbot.config.Config;
-import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.cache.RankCache;
-import com.kasp.rankedbot.instance.cache.ThemeCache;
+import com.kasp.rankedbot.instance.cache.*;
+import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -35,7 +35,7 @@ public class Player {
     private int strikes;
     private int scored;
     private int gold;
-    private int level;
+    private Level level;
     private int xp;
     private Theme theme;
     private ArrayList<Theme> ownedThemes;
@@ -65,7 +65,7 @@ public class Player {
             this.strikes = Integer.parseInt(data.get("strikes").toString());
             this.scored = Integer.parseInt(data.get("scored").toString());
             this.gold = Integer.parseInt(data.get("gold").toString());
-            this.level = Integer.parseInt(data.get("level").toString());
+            this.level = LevelCache.getLevel(Integer.parseInt(data.get("level").toString()));
             this.xp = Integer.parseInt(data.get("xp").toString());
             this.theme = ThemeCache.getTheme(data.get("theme").toString());
 
@@ -134,6 +134,11 @@ public class Player {
     }
 
     public void win() {
+        if (Boolean.parseBoolean(Config.getValue("levels-enabled"))) {
+            updateXP(Integer.parseInt(Config.getValue("play-xp")));
+            updateXP(Integer.parseInt(Config.getValue("win-xp")));
+        }
+
         wins++;
         winStreak++;
         elo += getRank().getWinElo();
@@ -152,6 +157,10 @@ public class Player {
     }
 
     public void lose() {
+        if (Boolean.parseBoolean(Config.getValue("levels-enabled"))) {
+            updateXP(Integer.parseInt(Config.getValue("play-xp")));
+        }
+
         losses++;
         lossStreak++;
 
@@ -168,6 +177,43 @@ public class Player {
 
         if (highestLS < lossStreak) {
             highestLS = lossStreak;
+        }
+    }
+
+    public void updateXP(int addXp) {
+        xp+=addXp;
+
+        for (int i = level.getLevel()+1; i < LevelCache.getLevels().size(); i++) {
+            if (xp >= LevelCache.getLevel(i).getNeededXP()) {
+                level = LevelCache.getLevel(i);
+
+                for (String s : LevelCache.getLevel(i).getRewards()) {
+                    if (s.startsWith("GOLD")) {
+                        gold+=Integer.parseInt(s.split("=")[1]);
+                    }
+                }
+
+                Embed embed = new Embed(EmbedType.SUCCESS, "LEVEL UP", "You have leveled up to `LEVEL " + i + "` \uD83C\uDF89", 1);
+                RankedBot.getGuild().getTextChannelById(Config.getValue("alerts-channel")).sendMessage("<@" + ID + ">").setEmbeds(embed.build()).queue();
+
+                return;
+            }
+        }
+
+        if (ClanCache.getClan(this) != null) {
+            Clan clan = ClanCache.getClan(this);
+            clan.setXp(clan.getXp()+Integer.parseInt(Config.getValue("clanxp-win")));
+
+            for (int i = clan.getLevel().getLevel()+1; i < ClanLevelCache.getClanLevels().size(); i++) {
+                if (clan.getXp() >= ClanLevelCache.getLevel(i).getNeededXP()) {
+                    clan.setLevel(ClanLevelCache.getLevel(i));
+
+                    Embed embed = new Embed(EmbedType.SUCCESS, "CLAN LEVEL UP", "Clan " + clan.getName() + " has leveled up to `LEVEL " + i + "` \uD83C\uDF89", 1);
+                    RankedBot.getGuild().getTextChannelById(Config.getValue("alerts-channel")).sendMessage("<@" + clan.getLeader().getID() + ">").setEmbeds(embed.build()).queue();
+
+                    return;
+                }
+            }
         }
     }
 
@@ -220,6 +266,89 @@ public class Player {
     public void joinParty(Party party) {
         party.getMembers().add(this);
         party.getInvitedPlayers().remove(this);
+    }
+
+    public double getStatistic(Statistic s) {
+        if (s == Statistic.ELO) {
+            return elo;
+        }
+        if (s == Statistic.PEAKELO) {
+            return peakElo;
+        }
+
+        if (s == Statistic.WINS) {
+            return wins;
+        }
+
+        if (s == Statistic.LOSSES) {
+            return losses;
+        }
+
+        if (s == Statistic.WINSTREAK) {
+            return winStreak;
+        }
+
+        if (s == Statistic.HIGHESTWS) {
+            return highestWS;
+        }
+
+        if (s == Statistic.HIGHESTLS) {
+            return highestLS;
+        }
+
+        if (s == Statistic.MVP) {
+            return mvp;
+        }
+
+        if (s == Statistic.KILLS) {
+            return kills;
+        }
+
+        if (s == Statistic.DEATHS) {
+            return deaths;
+        }
+
+        if (s == Statistic.STRIKES) {
+            return strikes;
+        }
+
+        if (s == Statistic.SCORED) {
+            return scored;
+        }
+
+        if (s == Statistic.GOLD) {
+            return gold;
+        }
+
+        if (s == Statistic.LEVEL) {
+            return level.getLevel();
+        }
+
+        if (s == Statistic.XP) {
+            return xp;
+        }
+
+        if (s == Statistic.WLR) {
+            double templosses = getLosses();
+            if (getLosses() == 0)
+                templosses = 1.0;
+
+            return getWins() / templosses;
+        }
+
+        if (s == Statistic.KDR) {
+            double tempdeaths = getDeaths();
+            if (getDeaths() == 0)
+                tempdeaths = 1.0;
+
+            return getKills() / tempdeaths;
+        }
+
+        if (s == Statistic.GAMES) {
+            return getWins() + getLosses();
+        }
+
+        return 0;
     }
 
     public void leaveParty(Party party) {
@@ -278,7 +407,7 @@ public class Player {
                 bw.write("strikes: " + player.getStrikes() + "\n");
                 bw.write("scored: " + player.getScored() + "\n");
                 bw.write("gold: " + player.getGold() + "\n");
-                bw.write("level: " + player.getLevel() + "\n");
+                bw.write("level: " + player.getLevel().getLevel() + "\n");
                 bw.write("xp: " + player.getXp() + "\n");
                 bw.write("theme: " + player.getTheme().getName() + "\n");
 
@@ -429,11 +558,11 @@ public class Player {
         this.gold = gold;
     }
 
-    public int getLevel() {
+    public Level getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(Level level) {
         this.level = level;
     }
 

@@ -21,6 +21,15 @@ leaderboard: everyone
 modify: everyone
 screenshare: everyone
 
+# party commands
+partycreate: everyone
+partyinvite: everyone
+partyjoin: everyone
+partyleave: everyone
+partylist: everyone
+partypromote: everyone
+partywarp: everyone
+
 # game commands
 queue: everyone
 queuestats: everyone
@@ -33,22 +42,18 @@ undogame: everyone
 win: everyone
 lose: everyone
 
-# queue commands
+# utilities commands
 addqueue: everyone
 deletequeue: everyone
 queues: everyone
-
-# rank commands
 addrank: everyone
 deleterank: everyone
 ranks: everyone
-
-# map commands
 addmap: everyone
 deletemap: everyone
 maps: everyone
+levels: everyone
 
-# theme commands
 givetheme: everyone
 removetheme: everyone
 theme: everyone
@@ -59,3 +64,13 @@ unban: everyone
 baninfo: everyone
 bans: everyone
 strike: everyone
+
+# clan
+clancreate: everyone
+clandisband: everyone
+claninvite: everyone
+clanjoin: everyone
+clanleave: everyone
+clanstats: everyone
+clanforcedisband: everyone
+clankick: everyone

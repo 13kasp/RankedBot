@@ -1,0 +1,28 @@
+# required xp to reach a certain level
+# separate required xp and rewards with ";;;"
+# separate multiple rewards with ","
+# available rewards - GOLD=amount
+# for example GOLD=50
+# players start at level 0, you can add as many levels as u want just set the total number below and add "l" before every level (like it is rn)
+total-levels: 20
+
+l1: 100;;;GOLD=10
+l2: 300;;;GOLD=30
+l3: 500;;;GOLD=50
+l4: 750;;;GOLD=75
+l5: 1000;;;GOLD=100
+l6: 1500;;;GOLD=150
+l7: 3000;;;GOLD=300
+l8: 5000;;;GOLD=500
+l9: 7500;;;GOLD=750
+l10: 10000;;;GOLD=1000
+l11: 15000
+l12: 20000
+l13: 30000
+l14: 50000
+l15: 75000;;;GOLD=1000
+l16: 100000
+l17: 125000
+l18: 150000
+l19: 175000
+l20: 200000;;;GOLD=3000

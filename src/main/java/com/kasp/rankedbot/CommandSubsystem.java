@@ -8,5 +8,6 @@ public enum CommandSubsystem {
     GAME,
     QUEUE,
     UTILITIES,
-    MODERATION;
+    MODERATION,
+    CLAN;
 }

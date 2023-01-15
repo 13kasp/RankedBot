@@ -63,18 +63,7 @@ public class VoidCmd extends Command {
                     game.setState(GameState.VOIDED);
                     game.setScoredBy(sender);
 
-                    if (game.getVc1() != null) {
-                        game.getVc1().delete().queue();
-                        game.getVc2().delete().queue();
-                    }
-
-                    TimerTask task = new TimerTask() {
-                        @Override
-                        public void run() {
-                            channel.delete().queue();
-                        }
-                    };
-                    new Timer().schedule(task, 60 * 1000L);
+                    game.closeChannel(60);
 
                     message1.editMessageEmbeds(done.build()).queue();
                     message1.clearReactions().queue();

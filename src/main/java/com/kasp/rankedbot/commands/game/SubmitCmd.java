@@ -66,9 +66,6 @@ public class SubmitCmd extends Command {
         embed.setFooter("RankedBot by kasp#0675");
         channel.sendMessageEmbeds(embed.build()).queue();
 
-        game.getVc1().delete().queue();
-        game.getVc2().delete().queue();
-
         game.setState(GameState.SUBMITTED);
 
         Embed scoring = new Embed(EmbedType.DEFAULT, "Game `#" + game.getNumber() + "` Scoring", "", 1);

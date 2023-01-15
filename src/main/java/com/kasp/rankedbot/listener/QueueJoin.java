@@ -28,11 +28,20 @@ public class QueueJoin extends ListenerAdapter {
 
                 Player player = PlayerCache.getPlayer(ID);
 
+                if (!Player.isRegistered(ID)) {
+                    event.getGuild().kickVoiceMember(event.getMember()).queue();
+
+                    Embed embed = new Embed(EmbedType.ERROR, "You Cannot Queue", "", 1);
+                    embed.setDescription("You are not registered. Please do `=register <your ign>` then try queueing again");
+                    alerts.sendMessage(event.getMember().getAsMention()).setEmbeds(embed.build()).queue();
+                    return;
+                }
+
                 if (player.isBanned()) {
                     event.getGuild().kickVoiceMember(event.getMember()).queue();
 
                     Embed embed = new Embed(EmbedType.ERROR, "You Cannot Queue", "", 1);
-                    embed.addField("It appears that you've been banned", "If this is a mistake, please do `=fix`. If it still doesn't remove your banned role, you can open an appeal ticket", false);
+                    embed.addField("It appears that you've been banned", "If this is a mistake, please do `=fix`. If it still doesn't remove your banned role, you can open an appeal ticket / contact staff", false);
                     alerts.sendMessage(event.getMember().getAsMention()).setEmbeds(embed.build()).queue();
                 }
                 else {

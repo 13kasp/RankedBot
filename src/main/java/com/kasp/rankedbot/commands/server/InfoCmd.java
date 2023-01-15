@@ -2,6 +2,7 @@ package com.kasp.rankedbot.commands.server;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
+import com.kasp.rankedbot.GameState;
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Game;
@@ -30,18 +31,20 @@ public class InfoCmd extends Command {
         }
 
         Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `kasp#0675`", 1);
-        embed.addField("Players", "`" + PlayerCache.getPlayers().size() + "` registered | `" + guild.getMemberCount() + "` total", true);
+        embed.addField("Players", "`" + PlayerCache.getPlayers().size() + "` registered | `" + guild.getMemberCount() + "` total", false);
         int qing = 0;
         for (Queue q : QueueCache.getQueues().values()) {
             qing += q.getPlayers().size();
         }
         int playing = 0;
         for (Game g : GameCache.getGames().values()) {
-            playing += g.getPlayers().size();
+            if (g.getState() == GameState.PLAYING) {
+                playing += g.getPlayers().size();
+            }
         }
 
-        embed.addField("Currently playing", "`" + qing + "` queueing | `" + playing + "` playing", true);
-        embed.addField("RAM Usage", "`" + (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / 1048576 + "`/`" + Runtime.getRuntime().maxMemory() / 1048576 + "` MB", true);
+        embed.addField("Currently playing", "`" + qing + "` queueing | `" + playing + "` playing", false);
+        embed.addField("RAM Usage", "`" + Runtime.getRuntime().freeMemory() / 1048576 + "`/`" + Runtime.getRuntime().maxMemory() / 1048576 + "` MB", false);
         msg.replyEmbeds(embed.build()).queue();
     }
 }

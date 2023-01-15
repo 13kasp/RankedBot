@@ -33,6 +33,7 @@ public class Strike extends Command {
         String reason = msg.getContentRaw().replaceAll(args[0], "").replaceAll(args[1], "").trim();
 
         Player player = PlayerCache.getPlayer(ID);
+        player.setStrikes(player.getStrikes()+1);
 
         int strikes = player.getStrikes();
         if (player.getStrikes() > 5) {
@@ -51,7 +52,7 @@ public class Strike extends Command {
             if (player.ban(LocalDateTime.now().plusHours(bantime), "[STRIKE] " + reason)) {
 
                 embed.addField("You are now banned for: ", "`" + bantime + " hours`", false);
-                embed.setDescription("<@" + ID + "> Please do `=fix` after " + bantime + "h to get unbanned");
+                embed.setDescription("<@" + ID + "> Please do `=fix` after " + bantime + "h if you're still not unbanned");
             }
             else {
                 embed.addField("WARNING", "I couldn't ban the player since they're already banned", false);

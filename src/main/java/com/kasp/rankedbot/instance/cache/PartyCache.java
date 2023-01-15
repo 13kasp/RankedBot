@@ -23,7 +23,7 @@ public class PartyCache {
     public static void addParty(Party party) {
         parties.add(party);
 
-        System.out.println("Party created by " + party.getLeader() + " has been loaded into memory");
+        System.out.println("Party created by " + party.getLeader().getIgn() + " has been loaded into memory");
     }
 
     public static void removeParty(Party party) {

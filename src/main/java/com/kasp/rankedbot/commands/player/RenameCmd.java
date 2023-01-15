@@ -25,7 +25,7 @@ public class RenameCmd extends Command {
             return;
         }
 
-        String ign = args[1];
+        String ign = args[1].replaceAll("[^a-zA-Z0-9]+","");
         ign = ign.replaceAll(" ", "").trim();
 
         if (ign.length() > 16) {

@@ -3,9 +3,11 @@ package com.kasp.rankedbot.commands.server;
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.instance.Clan;
 import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.ServerStats;
+import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
@@ -29,16 +31,35 @@ public class SaveDataCmd extends Command {
         }
 
         for (Player p : PlayerCache.getPlayers().values()) {
-            Player.writeFile(p.getID(), null);
+            try {
+                Player.writeFile(p.getID(), null);
+                System.out.println("Saved player " + p.getIgn() + " data");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         for (Game g : GameCache.getGames().values()) {
-            Game.writeFile(g);
+            try {
+                Game.writeFile(g);
+                System.out.println("Saved game " + g.getNumber() + " data");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (Clan c : ClanCache.getClans().values()) {
+            try {
+                c.writeFile();
+                System.out.println("Saved clan " + c.getName() + " data");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         ServerStats.save();
 
-        Embed reply = new Embed(EmbedType.ERROR, "Data saved", "All players and games data has been saved", 1);
+        Embed reply = new Embed(EmbedType.ERROR, "Data saved", "All players, clans and games data has been saved", 1);
         msg.replyEmbeds(reply.build()).queue();
     }
 }

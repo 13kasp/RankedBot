@@ -7,6 +7,8 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
+import com.kasp.rankedbot.instance.cache.ClanCache;
+import com.kasp.rankedbot.instance.cache.LevelCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
@@ -44,6 +46,12 @@ public class StatsCmd extends Command {
                 ID = sender.getId();
             else
                 ID = args[1].replaceAll("[^0-9]","");
+        }
+
+        if (PlayerCache.getPlayer(ID) == null) {
+            Embed reply = new Embed(EmbedType.ERROR, "Invalid Player", Msg.getMsg("invalid-player"), 1);
+            msg.replyEmbeds(reply.build()).queue();
+            return;
         }
 
         Player player = PlayerCache.getPlayer(ID);
@@ -88,34 +96,72 @@ public class StatsCmd extends Command {
 
                     Graphics2D gfx = (Graphics2D) image.getGraphics();
 
-                    gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("s-text-size"))));
-                    gfx.setColor(new Color(Integer.parseInt(Config.getValue("s-values-color").split(",")[0]),
-                                            Integer.parseInt(Config.getValue("s-values-color").split(",")[1]),
-                                            Integer.parseInt(Config.getValue("s-values-color").split(",")[2])));
-
-                    gfx.drawString(player.getElo() + "", Integer.parseInt(Config.getValue("elo-pixels").split(",")[0]), Integer.parseInt(Config.getValue("elo-pixels").split(",")[1]));
-                    gfx.drawString(player.getMvp() + "", Integer.parseInt(Config.getValue("mvp-pixels").split(",")[0]), Integer.parseInt(Config.getValue("mvp-pixels").split(",")[1]));
-                    gfx.drawString(games + "", Integer.parseInt(Config.getValue("games-pixels").split(",")[0]), Integer.parseInt(Config.getValue("games-pixels").split(",")[1]));
-                    gfx.drawString(f.format(player.getWins() / templosses) + "", Integer.parseInt(Config.getValue("wlr-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wlr-pixels").split(",")[1]));
-                    gfx.drawString(player.getWins() + "", Integer.parseInt(Config.getValue("wins-pixels").split(",")[0]), Integer.parseInt(Config.getValue("wins-pixels").split(",")[1]));
-                    gfx.drawString(player.getLosses() + "", Integer.parseInt(Config.getValue("losses-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losses-pixels").split(",")[1]));
-                    gfx.drawString(player.getWinStreak() + "", Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("winstreak-pixels").split(",")[1]));
-                    gfx.drawString(player.getLossStreak() + "", Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[0]), Integer.parseInt(Config.getValue("losestreak-pixels").split(",")[1]));
-                    gfx.drawString(player.getStrikes() + "", Integer.parseInt(Config.getValue("strikes-pixels").split(",")[0]), Integer.parseInt(Config.getValue("strikes-pixels").split(",")[1]));
-                    gfx.drawString(player.getScored() + "", Integer.parseInt(Config.getValue("scored-pixels").split(",")[0]), Integer.parseInt(Config.getValue("scored-pixels").split(",")[1]));
-
-                    Role role = guild.getRoleById(player.getRank().getID());
-
-                    gfx.setColor(role.getColor());
-
-                    gfx.drawString(role.getName(), Integer.parseInt(Config.getValue("role-pixels").split(",")[0]), Integer.parseInt(Config.getValue("role-pixels").split(",")[1]));
-
                     gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("ign-size"))));
-                    gfx.setColor(Color.white);
+                    gfx.setColor(new Color(Integer.parseInt(Config.getValue("ign-color").split(",")[0]),
+                            Integer.parseInt(Config.getValue("ign-color").split(",")[1]),
+                            Integer.parseInt(Config.getValue("ign-color").split(",")[2])));
                     gfx.drawString(player.getIgn() + "", Integer.parseInt(Config.getValue("ign-pixels").split(",")[0]), Integer.parseInt(Config.getValue("ign-pixels").split(",")[1]));
 
+                    for (Statistic s : Statistic.values()) {
+                        if (s == Statistic.ID) {
+                            continue;
+                        }
+                        gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue(s + "-size"))));
+                        gfx.setColor(new Color(Integer.parseInt(Config.getValue(s + "-color").split(",")[0]),
+                                Integer.parseInt(Config.getValue(s + "-color").split(",")[1]),
+                                Integer.parseInt(Config.getValue(s + "-color").split(",")[2])));
+                        if (s != Statistic.WLR) {
+                            gfx.drawString((int) player.getStatistic(s) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
+                        }
+                        else {
+                            gfx.drawString(f.format(player.getStatistic(s)) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
+                        }
+                    }
+
+                    // needed xp
+                    if (LevelCache.containsLevel(player.getLevel().getLevel()+1)) {
+                        gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("needed-xp-size"))));
+                        gfx.setColor(new Color(Integer.parseInt(Config.getValue("needed-xp-color").split(",")[0]),
+                                Integer.parseInt(Config.getValue("needed-xp-color").split(",")[1]),
+                                Integer.parseInt(Config.getValue("needed-xp-color").split(",")[2])));
+                        gfx.drawString(LevelCache.getLevel(player.getLevel().getLevel()+1).getNeededXP() + "", Integer.parseInt(Config.getValue("needed-xp-pixels").split(",")[0]), Integer.parseInt(Config.getValue("needed-xp-pixels").split(",")[1]));
+                    }
+
+                    // theme
+                    gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("theme-size"))));
+                    gfx.setColor(new Color(Integer.parseInt(Config.getValue("theme-color").split(",")[0]),
+                            Integer.parseInt(Config.getValue("theme-color").split(",")[1]),
+                            Integer.parseInt(Config.getValue("theme-color").split(",")[2])));
+                    gfx.drawString(player.getTheme().getName() + "", Integer.parseInt(Config.getValue("theme-pixels").split(",")[0]), Integer.parseInt(Config.getValue("theme-pixels").split(",")[1]));
+
+                    // rbw role
+                    Role role = guild.getRoleById(player.getRank().getID());
+                    gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("rbw-rank-size"))));
+                    gfx.setColor(role.getColor());
+                    gfx.drawString(role.getName(), Integer.parseInt(Config.getValue("rbw-rank-pixels").split(",")[0]), Integer.parseInt(Config.getValue("rbw-rank-pixels").split(",")[1]));
+
+                    // banned
+                    if (player.isBanned()) {
+                        gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("banned-size"))));
+                        gfx.setColor(new Color(Integer.parseInt(Config.getValue("banned-color").split(",")[0]),
+                                Integer.parseInt(Config.getValue("banned-color").split(",")[1]),
+                                Integer.parseInt(Config.getValue("banned-color").split(",")[2])));
+                        gfx.drawString("BANNED" + "", Integer.parseInt(Config.getValue("banned-pixels").split(",")[0]), Integer.parseInt(Config.getValue("banned-pixels").split(",")[1]));
+                    }
+
+                    // clan
+                    if (ClanCache.getClan(player) != null) {
+                        gfx.setFont(new Font(Config.getValue("s-text-font"), Font.PLAIN, Integer.parseInt(Config.getValue("clan-size"))));
+                        gfx.setColor(new Color(Integer.parseInt(Config.getValue("clan-color").split(",")[0]),
+                                Integer.parseInt(Config.getValue("clan-color").split(",")[1]),
+                                Integer.parseInt(Config.getValue("clan-color").split(",")[2])));
+                        gfx.drawString(ClanCache.getClan(player).getName(), Integer.parseInt(Config.getValue("clan-pixels").split(",")[0]), Integer.parseInt(Config.getValue("clan-pixels").split(",")[1]));
+                    }
+
+                    // skin
                     gfx.drawImage(skin, Integer.parseInt(Config.getValue("skin-pixels").split(",")[0]), Integer.parseInt(Config.getValue("skin-pixels").split(",")[1]), null);
 
+                    // finish
                     gfx.dispose();
 
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();

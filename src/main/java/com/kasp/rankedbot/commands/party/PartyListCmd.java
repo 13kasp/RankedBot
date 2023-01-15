@@ -37,6 +37,12 @@ public class PartyListCmd extends Command {
             ID = sender.getId();
         }
 
+        if (PartyCache.getParty(PlayerCache.getPlayer(ID)) == null) {
+            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-in-party"), 1);
+            msg.replyEmbeds(reply.build()).queue();
+            return;
+        }
+
         Party party = PartyCache.getParty(PlayerCache.getPlayer(ID));
 
         String title = "players `[" + party.getMembers().size() + "/" + Config.getValue("max-party-members") + "]`";

@@ -16,7 +16,7 @@ public class GameCache {
     public static Game getGame(String channelID) {
 
         for (Game g : games.values()) {
-            if (g.getChannel().getId().equals(channelID)) {
+            if (g.getChannel().equals(channelID)) {
                 return g;
             }
         }

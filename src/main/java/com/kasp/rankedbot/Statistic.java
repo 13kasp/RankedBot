@@ -14,6 +14,7 @@ public enum Statistic {
     MVP,
     KILLS,
     DEATHS,
+    KDR,
     STRIKES,
     SCORED,
     GOLD,

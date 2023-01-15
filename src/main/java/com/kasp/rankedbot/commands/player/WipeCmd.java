@@ -27,9 +27,9 @@ public class WipeCmd extends Command {
             return;
         }
 
-        if (!args[1].equals("@everyone")) {
+        if (args[1].equals("everyone")) {
             File[] filesList = new File("RankedBot/players").listFiles();
-            double time = filesList.length / 4.0;
+            double time = filesList.length / 15.0;
 
             Embed reply = new Embed(EmbedType.DEFAULT, "Resetting everyone's stats...", "`Check console for more details`", 1);
             reply.addField("WARNING", "please do not use any other cmd during the reset\nit might result into errors / slower resetting", false);
@@ -44,6 +44,7 @@ public class WipeCmd extends Command {
                 if (guild.getMemberById(player.getID()) != null) {
                     player.fix();
                 }
+                System.out.println("[=wipe] successfully reset " + player.getIgn() + " (" + player.getID() + ")");
             }
 
             long end = System.currentTimeMillis();

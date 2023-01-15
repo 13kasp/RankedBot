@@ -24,9 +24,9 @@ public class Game {
     private Category channelsCategory;
     private Category vcsCategory;
 
-    private TextChannel channel;
-    private VoiceChannel vc1;
-    private VoiceChannel vc2;
+    private String channelID;
+    private String vc1ID;
+    private String vc2ID;
 
     private Queue queue;
 
@@ -55,6 +55,7 @@ public class Game {
     private HashMap<Player, Integer> eloGain; // used for =undogame
 
     public Game(List<Player> players, Queue queue) {
+
         guild = RankedBot.getGuild();
         this.players = new ArrayList<>(players);
         this.queue = queue;
@@ -76,14 +77,18 @@ public class Game {
         this.channelsCategory = guild.getCategoryById(Config.getValue("game-channels-category"));
         this.vcsCategory = guild.getCategoryById(Config.getValue("game-vcs-category"));
 
-        channel = channelsCategory.createTextChannel(Config.getValue("game-channel-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" + queue.getPlayersEachTeam())).complete();
-        vc1 = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "1")).setUserlimit(queue.getPlayersEachTeam()).complete();
-        vc2 = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "2")).setUserlimit(queue.getPlayersEachTeam()).complete();
+        TextChannel channel = channelsCategory.createTextChannel(Config.getValue("game-channel-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" + queue.getPlayersEachTeam())).complete();
+        VoiceChannel vc1 = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "1")).setUserlimit(queue.getPlayersEachTeam()).complete();
+        VoiceChannel vc2 = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "2")).setUserlimit(queue.getPlayersEachTeam()).complete();
+
+        channelID = channel.getId();
+        vc1ID = vc1.getId();
+        vc2ID = vc2.getId();
 
         Collections.shuffle(players);
         this.remainingPlayers = new ArrayList<>(players);
 
-        if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
+        if (queue.getPickingMode() == PickingMode.CAPTAINS) {
             this.captain1 = players.get(0);
             this.captain2 = players.get(1);
 
@@ -118,6 +123,11 @@ public class Game {
         this.number = number;
         this.guild = RankedBot.getGuild();
 
+        this.team1 = new ArrayList<>();
+        this.team2 = new ArrayList<>();
+        this.eloGain = new HashMap<>();
+        this.remainingPlayers = new ArrayList<>();
+
         Yaml yaml = new Yaml();
 
         Map<String, Object> data;
@@ -130,18 +140,15 @@ public class Game {
         this.state = GameState.valueOf(data.get("state").toString().toUpperCase());
         this.casual = Boolean.parseBoolean(data.get("casual").toString());
         this.map = MapCache.getMap(data.get("map").toString());
-        this.channel = guild.getTextChannelById(data.get("channel-id").toString());
-        this.vc1 = guild.getVoiceChannelById(data.get("vc1-id").toString());
-        this.vc2 = guild.getVoiceChannelById(data.get("vc2-id").toString());
-        this.queue = QueueCache.getQueue(data.get("queue").toString());
+        this.channelID = data.get("channel-id").toString();
+        this.vc1ID = data.get("vc1-id").toString();
+        this.vc2ID = data.get("vc2-id").toString();
+        this.queue = QueueCache.getQueue(data.get("queue-id").toString());
 
         if (state != GameState.STARTING) {
             if (state != GameState.SCORED) {
                 for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team1.add(PlayerCache.getPlayer(data.get("team1-" + i).toString()));
-                }
-
-                for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
                     team2.add(PlayerCache.getPlayer(data.get("team2-" + i).toString()));
                 }
             }
@@ -187,12 +194,18 @@ public class Game {
 
             if (parties.size() > 0) {
                 for (Party p : parties) {
-                    if (queue.getPlayersEachTeam() - team1.size() >= p.getMembers().size()) {
-                        team1.addAll(p.getMembers());
+                    if (team1.size() < team2.size()) {
+                        if (queue.getPlayersEachTeam() - team1.size() >= p.getMembers().size()) {
+                            team1.addAll(p.getMembers());
+                        }
+
                     }
-                    else if (queue.getPlayersEachTeam() - team2.size() >= p.getMembers().size()) {
-                        team2.addAll(p.getMembers());
+                    else {
+                        if (queue.getPlayersEachTeam() - team2.size() >= p.getMembers().size()) {
+                            team2.addAll(p.getMembers());
+                        }
                     }
+
                     remainingPlayers.removeAll(p.getMembers());
                 }
             }
@@ -221,7 +234,7 @@ public class Game {
         sendGameMsg();
 
         for (Player p : team2) {
-            guild.moveVoiceMember(guild.getMemberById(p.getID()), vc2).queue();
+            guild.moveVoiceMember(guild.getMemberById(p.getID()), guild.getVoiceChannelById(vc2ID)).queue();
         }
 
         if (casual) {
@@ -237,6 +250,10 @@ public class Game {
         }
 
         Embed embed = new Embed(EmbedType.DEFAULT, "Game `#" + number + "`", "", 1);
+
+        if (queue.getPickingMode() == PickingMode.CAPTAINS) {
+            embed.setDescription(guild.getMemberById(currentCaptain.getID()).getAsMention() + "'s turn to `=pick`");
+        }
 
         String team1 = "";
         for (Player p : this.team1) {
@@ -281,7 +298,7 @@ public class Game {
             embed.setDescription("do not forget to `=submit` after your game ends");
         }
 
-        channel.sendMessage(mentions).setEmbeds(embed.build()).queue();
+        guild.getTextChannelById(channelID).sendMessage(mentions).setEmbeds(embed.build()).queue();
     }
 
     // bool - was the action successful or not
@@ -305,6 +322,8 @@ public class Game {
 
         getPlayerTeam(sender).add(picked);
         remainingPlayers.remove(picked);
+
+        currentCaptain = getOppTeam(PlayerCache.getPlayer(sender.getID())).get(0);
 
         sendGameMsg();
 
@@ -409,8 +428,10 @@ public class Game {
     }
 
     public void closeChannel(int timeSeconds) {
-        Embed embed = new Embed(EmbedType.DEFAULT, "", "Game channel deleting in `" + timeSeconds + "` seconds / `" + timeSeconds / 60 + "` minutes", 1);
-        channel.sendMessageEmbeds(embed.build()).queue();
+        if (guild.getTextChannelById(channelID) != null) {
+            Embed embed = new Embed(EmbedType.DEFAULT, "", "Game channel deleting in `" + timeSeconds + "` seconds / `" + timeSeconds / 60 + "` minutes", 1);
+            guild.getTextChannelById(channelID).sendMessageEmbeds(embed.build()).queue();
+        }
 
         if (closingTask != null) {
             closingTask.cancel();
@@ -419,7 +440,17 @@ public class Game {
         closingTask = new TimerTask() {
             @Override
             public void run() {
-                channel.delete().queue();
+                try {
+                    if (guild.getTextChannelById(channelID) != null) {
+                        guild.getTextChannelById(channelID).delete().queue();
+                    }
+                    if (guild.getVoiceChannelById(vc1ID) != null) {
+                        guild.getVoiceChannelById(vc1ID).delete().queue();
+                    }
+                    if (guild.getVoiceChannelById(vc2ID) != null) {
+                        guild.getVoiceChannelById(vc2ID).delete().queue();
+                    }
+                } catch (Exception ignored) {};
             }
         };
 
@@ -432,10 +463,10 @@ public class Game {
 
             bw.write("state: " + g.getState() + "\n");
             bw.write("casual: " + g.isCasual() + "\n");
-            bw.write("map: " + g.getMap() + "\n");
-            bw.write("channel-id: " + g.getChannel().getId() + "\n");
-            bw.write("vc1-id: " + g.getVc1().getId() + "\n");
-            bw.write("vc2-id: " + g.getVc2().getId() + "\n");
+            bw.write("map: " + g.getMap().getName() + "\n");
+            bw.write("channel-id: " + g.getChannel() + "\n");
+            bw.write("vc1-id: " + g.getVc1() + "\n");
+            bw.write("vc2-id: " + g.getVc2() + "\n");
             bw.write("queue-id: " + g.getQueue().getID() + "\n");
 
             if (g.getState() != GameState.STARTING) {
@@ -492,8 +523,8 @@ public class Game {
         return number;
     }
 
-    public TextChannel getChannel() {
-        return channel;
+    public String getChannel() {
+        return channelID;
     }
 
     public void setNumber(int number) {
@@ -524,24 +555,24 @@ public class Game {
         this.vcsCategory = vcsCategory;
     }
 
-    public void setChannel(TextChannel channel) {
-        this.channel = channel;
+    public void setChannel(String channel) {
+        this.channelID = channel;
     }
 
-    public VoiceChannel getVc1() {
-        return vc1;
+    public String getVc1() {
+        return vc1ID;
     }
 
-    public void setVc1(VoiceChannel vc1) {
-        this.vc1 = vc1;
+    public void setVc1(String vc1) {
+        this.vc1ID = vc1;
     }
 
-    public VoiceChannel getVc2() {
-        return vc2;
+    public String getVc2() {
+        return vc2ID;
     }
 
-    public void setVc2(VoiceChannel vc2) {
-        this.vc2 = vc2;
+    public void setVc2(String vc2) {
+        this.vc2ID = vc2;
     }
 
     public Queue getQueue() {

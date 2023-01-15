@@ -43,10 +43,10 @@ public class Queue {
         queueTimer = new TimerTask() {
             @Override
             public void run() {
-                List<Party> partiesInQ = new ArrayList<>();
-                List<Player> soloPlayersInQ = new ArrayList<>();
-
                 if (players.size() >= playersEachTeam * 2) {
+
+                    List<Party> partiesInQ = new ArrayList<>();
+                    List<Player> soloPlayersInQ = new ArrayList<>();
 
                     // CHECK FOR ALL PARTIES AND SOLO PLAYERS
                     for (Player p : players) {
@@ -60,12 +60,13 @@ public class Queue {
                         }
                     }
 
+                    List<Party> partiesStillInQ = new ArrayList<>(partiesInQ);
                     // REMOVE PARTIES IF NOT ALL PARTY PLAYERS IN Q
-                    if (partiesInQ.size() != 0) {
+                    if (partiesInQ.size() > 0) {
                         for (Party p : partiesInQ) {
                             for (Player player : p.getMembers()) {
                                 if (!players.contains(player)) {
-                                    partiesInQ.remove(PartyCache.getParty(player));
+                                    partiesStillInQ.remove(PartyCache.getParty(player));
                                 }
                             }
                         }
@@ -73,18 +74,29 @@ public class Queue {
 
                     // CHECK HOW MANY STILL ABLE TO Q
                     List<Player> ableToQ = new ArrayList<>(soloPlayersInQ);
-                    for (Party p : partiesInQ) {
-                        for (Player player : p.getMembers()) {
-                            ableToQ.add(player);
-                        }
+                    for (Party p : partiesStillInQ) {
+                        ableToQ.addAll(p.getMembers());
                     }
 
                     if (ableToQ.size() >= getPlayersEachTeam() * 2) {
                         List<Player> playerList = new ArrayList<>();
-                        for (int i = 0; i < getPlayersEachTeam() * 2; i++) {
-                            playerList.add(ableToQ.get(i));
+
+                        for (Party p : partiesStillInQ) {
+                            if (playerList.size() + p.getMembers().size() <= getPlayersEachTeam() * 2) {
+                                playerList.addAll(p.getMembers());
+                                ableToQ.removeAll(p.getMembers());
+                            }
                         }
-                        new Game(playerList, q).pickTeams();
+
+                        int tempPL = playerList.size();
+                        for (int i = 0; i < getPlayersEachTeam() * 2 - tempPL; i++) {
+                            playerList.add(ableToQ.get(i));
+
+                        }
+
+                        if (playerList.size() == getPlayersEachTeam() * 2) {
+                            new Game(playerList, q).pickTeams();
+                        }
                     }
                 }
             }

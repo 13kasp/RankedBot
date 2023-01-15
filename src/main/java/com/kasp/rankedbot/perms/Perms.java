@@ -31,7 +31,9 @@ public class Perms {
             Yaml yaml = new Yaml();
             Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/permissions.yml"));
             for (String s : data.keySet()) {
-                permsData.put(s, data.get(s).toString());
+                if (data.get(s) != null) {
+                    permsData.put(s, data.get(s).toString());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

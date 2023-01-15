@@ -2,26 +2,22 @@ package com.kasp.rankedbot.commands;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
+import com.kasp.rankedbot.commands.clan.*;
 import com.kasp.rankedbot.commands.game.*;
+import com.kasp.rankedbot.commands.moderation.Ban;
+import com.kasp.rankedbot.commands.moderation.BanInfo;
+import com.kasp.rankedbot.commands.moderation.Strike;
+import com.kasp.rankedbot.commands.moderation.Unban;
 import com.kasp.rankedbot.commands.party.*;
-import com.kasp.rankedbot.commands.utilities.AddMapCmd;
-import com.kasp.rankedbot.commands.utilities.DeleteMapCmd;
-import com.kasp.rankedbot.commands.utilities.MapsCmd;
-import com.kasp.rankedbot.commands.moderation.*;
 import com.kasp.rankedbot.commands.player.*;
 import com.kasp.rankedbot.commands.queue.AddQueueCmd;
 import com.kasp.rankedbot.commands.queue.DeleteQueueCmd;
 import com.kasp.rankedbot.commands.queue.QueuesCmd;
-import com.kasp.rankedbot.commands.utilities.AddRankCmd;
-import com.kasp.rankedbot.commands.utilities.DeleteRankCmd;
-import com.kasp.rankedbot.commands.utilities.RanksCmd;
 import com.kasp.rankedbot.commands.server.HelpCmd;
 import com.kasp.rankedbot.commands.server.InfoCmd;
 import com.kasp.rankedbot.commands.server.ReloadConfigCmd;
 import com.kasp.rankedbot.commands.server.SaveDataCmd;
-import com.kasp.rankedbot.commands.utilities.GiveThemeCmd;
-import com.kasp.rankedbot.commands.utilities.RemoveThemeCmd;
-import com.kasp.rankedbot.commands.utilities.ThemeCmd;
+import com.kasp.rankedbot.commands.utilities.*;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.embed.Embed;
@@ -57,13 +53,13 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new ModifyCmd("modify", "modify <ID/mention> <statistic> <value>", new String[]{"edit"}, "Modify player's stats", CommandSubsystem.PLAYER));
         commands.add(new ScreenshareCmd("screenshare", "screenshare <ID/mention> <reason>", new String[]{"ss"}, "Screenshare a player", CommandSubsystem.PLAYER));
 
-        commands.add(new PartyCreateCmd("partycreate", "partycreate", new String[]{"pc", "partyc"}, "Create a party", CommandSubsystem.PARTY));
-        commands.add(new PartyInviteCmd("partyinvite", "partyinvite <ID/mention>", new String[]{"pi", "partyi"}, "Invite a player to your party", CommandSubsystem.PARTY));
-        commands.add(new PartyJoinCmd("partyjoin", "partyjoin <ID/mention>", new String[]{"pj", "partyj"}, "Join a player's party", CommandSubsystem.PARTY));
-        commands.add(new PartyLeaveCmd("partyleave", "partyleave", new String[]{"pl", "partyl"}, "Leave your current party or disband it if you're the leader", CommandSubsystem.PARTY));
-        commands.add(new PartyPromoteCmd("partypromote", "partypromote <ID/metion>", new String[]{"pp", "partyp"}, "Promote a player in your party to party leader", CommandSubsystem.PARTY));
-        commands.add(new PartyWarpCmd("partywarp", "partywarp", new String[]{"pw", "partyw"}, "Warp your party to your current vc (warps a member only if that member is in any vc)", CommandSubsystem.PARTY));
-        commands.add(new PartyListCmd("partylist", "partylist [ID/mention]", new String[]{"pli", "partyli"}, "View info about your or someone else's party", CommandSubsystem.PARTY));
+        commands.add(new PartyCreateCmd("partycreate", "partycreate", new String[]{"pcreate"}, "Create a party", CommandSubsystem.PARTY));
+        commands.add(new PartyInviteCmd("partyinvite", "partyinvite <ID/mention>", new String[]{"pinvite"}, "Invite a player to your party", CommandSubsystem.PARTY));
+        commands.add(new PartyJoinCmd("partyjoin", "partyjoin <ID/mention>", new String[]{"pjoin"}, "Join a player's party", CommandSubsystem.PARTY));
+        commands.add(new PartyLeaveCmd("partyleave", "partyleave", new String[]{"pleave"}, "Leave your current party or disband it if you're the leader", CommandSubsystem.PARTY));
+        commands.add(new PartyPromoteCmd("partypromote", "partypromote <ID/metion>", new String[]{"ppromote"}, "Promote a player in your party to party leader", CommandSubsystem.PARTY));
+        commands.add(new PartyWarpCmd("partywarp", "partywarp", new String[]{"pwarp"}, "Warp your party to your current vc (warps a member only if that member is in any vc)", CommandSubsystem.PARTY));
+        commands.add(new PartyListCmd("partylist", "partylist [ID/mention]", new String[]{"plist"}, "View info about your or someone else's party", CommandSubsystem.PARTY));
 
         commands.add(new QueueCmd("queue", "queue", new String[]{"q"}, "View your game's queue", CommandSubsystem.GAME));
         commands.add(new QueueStatsCmd("queuestats", "queuestats", new String[]{"qs"}, "View your game's queue stats", CommandSubsystem.GAME));
@@ -90,11 +86,22 @@ public class CommandManager extends ListenerAdapter {
         commands.add(new GiveThemeCmd("givetheme", "givetheme <ID/mention> <theme>", new String[]{}, "Give specified player access to a theme", CommandSubsystem.UTILITIES));
         commands.add(new RemoveThemeCmd("removetheme", "removetheme <ID/mention> <theme>", new String[]{}, "Remove specified player's access to a theme", CommandSubsystem.UTILITIES));
         commands.add(new ThemeCmd("theme", "theme <theme/\"list\">", new String[]{}, "Select a theme or use \"list\" to view all themes", CommandSubsystem.UTILITIES));
+        commands.add(new LevelsCmd("levels", "levels", new String[]{}, "View all levels and info about them", CommandSubsystem.UTILITIES));
 
         commands.add(new Ban("ban", "ban <ID/mention> <time> <reason>", new String[]{}, "Ban a player from queueing", CommandSubsystem.MODERATION));
         commands.add(new Unban("unban", "unban <ID/mention>", new String[]{}, "Unban a banned player", CommandSubsystem.MODERATION));
         commands.add(new BanInfo("baninfo", "baninfo <ID/mention>", new String[]{}, "View info about a specific ban", CommandSubsystem.MODERATION));
         commands.add(new Strike("strike", "strike <ID/mention> <reason>", new String[]{}, "Strike a player - take away elo + ban from queueing (depends on how many strikes the player already has)", CommandSubsystem.MODERATION));
+
+        commands.add(new ClanCreateCmd("clancreate", "clancreate <name>", new String[]{"ccreate"}, "Create a clan", CommandSubsystem.CLAN));
+        commands.add(new ClanDisbandCmd("clandisband", "clandisband", new String[]{"cdisband"}, "Disband the clan you're in (if you're the leader)", CommandSubsystem.CLAN));
+        commands.add(new ClanInviteCmd("claninvite", "claninvite <ID/mention>", new String[]{"cinvite"}, "Invite a player to your clan (invites expire every time the bot is restarted)", CommandSubsystem.CLAN));
+        commands.add(new ClanJoinCmd("clanjoin", "clanjoin <name>", new String[]{"cjoin"}, "Join a clan (if you're invited)", CommandSubsystem.CLAN));
+        commands.add(new ClanLeaveCmd("clanleave", "clanleave", new String[]{"cleave"}, "Leave the clan you're currently in (if you're not the leader)", CommandSubsystem.CLAN));
+        commands.add(new ClanStatsCmd("clanstats", "clanstats <name>", new String[]{"cstats"}, "View stats/info about a certain clan", CommandSubsystem.CLAN));
+        commands.add(new ClanForceDisbandCmd("clanforcedisband", "clanforcedisband <name>", new String[]{"cfdisband"}, "Forcefully disband a clan", CommandSubsystem.CLAN));
+        commands.add(new ClanKickCmd("clankick", "clankick <ID/mention>", new String[]{"ckick"}, "Kick a player from your clan", CommandSubsystem.CLAN));
+        commands.add(new ClanSettingsCmd("clansettings", "clansettings <setting> <value>", new String[]{"csettings"}, "Modify settings for your clan", CommandSubsystem.CLAN));
     }
 
     @Override
@@ -157,6 +164,9 @@ public class CommandManager extends ListenerAdapter {
     private boolean checkPerms (Command cmd, Member m, Guild g) {
         boolean access = false;
 
+        if (Perms.getPerm(cmd.getCommand()) == null) {
+            return false;
+        }
         if (Perms.getPerm(cmd.getCommand()).equals("everyone")) {
             access = true;
         }

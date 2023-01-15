@@ -105,6 +105,17 @@ submitting-attachments: 1
 # Role to ping when game gets submitted
 scorer-role: 947231507343364097
 
+#============================== LEVELS
+
+# set to "false" to disable levels completely
+levels-enabled: true
+
+# xp for winning a game
+win-xp: 50
+
+# xp for playing a game (doesn't matter if won or lost)
+play-xp: 25
+
 #============================== PARTY
 
 # you can disable parties by simply disabling every command in permissions.yml
@@ -119,37 +130,253 @@ max-party-members: 3
 # how much elo maximum can party members have combined
 max-party-elo: 1800
 
+#============================== CLAN
+
+# max characters in clan name
+clan-name-max: 20
+
+# max characters in clan description
+clan-desc-max: 37
+
+# how much gold does it cost to create a clan
+gold-to-create: 500
+
+# how much elo is required to create a clan
+elo-to-create: 300
+
+# starting reputation (reputation is like elo for a clan)
+clan-starting-rep: 0
+
+# How many members MAX can a clan have at certain level
+# please put as many levels here as the clanlevels.yml file has
+l0: 10
+l1: 11
+l2: 12
+l3: 13
+l4: 14
+l5: 15
+l6: 16
+l7: 17
+l8: 18
+l9: 19
+l10: 20
+
+# what level does a clan need to reach to be able to set a clan icon?
+# put this to a high number to disable it
+# default icon is the one which you put in RankedBot/clans/icon.png
+allow-setting-icon: 5
+
+# what level does a clan need to reach to be able to set a =clanstats theme?
+# put this to a high number to disable it
+# default theme is the one which you put in RankedBot/clans/theme.png
+allow-setting-theme: 10
+
+# how much clan XP do players get from winning
+clanxp-win: 50
+
+# how much clan XP do players get from playing a game
+# it doesn't matter if they lose or win, they still get it for playing
+clanxp-game: 25
+
+#============================== CLAN WAR
+
+# how much clan XP does a clan get from winning a clan war
+cw-xp: 3000
+
+# how much clan reputation does a clan get from winning a clan war battle
+cw-rep-win: 25
+
+# how much clan reputation does a clan get from losing a clan war battle
+cw-rep-loss: -25
+
 #============================== STATS IMAGE(S)
 
 s-enabled: true
 
 # don't change this if you dk what you're doing
 s-text-font: "Minecraft"
-s-text-size: 31
 
-# configure color for values (RGB)
-s-values-color: 255,255,255
+# configure the size, color and pixels location of where the values (numbers/text for a certain stat) are displayed
+# or write big numbers (like 9999,9999) to disable showing those values
 
-# player ign
-ign-size: 42
-ign-pixels: 35,52
+# yes this is a big one, but I really wanted to give u full control
+# over the stats img so u can make whatever you want
 
-# configure the location of where the values are displayed (pixels)
-# or leave blank to disable displaying certain values
+ign-size: 36
+ign-color: 255,255,255
+ign-pixels: 30,46
 
-strikes-pixels: 41948,86114654
-scored-pixels: 169,292
-role-pixels: 53,367
+ELO-size: 40
+ELO-color: 255,133,133
+ELO-pixels: 305,45
 
-elo-pixels: 735,129
-mvp-pixels: 744,163
-games-pixels: 780,198
-wlr-pixels: 745,232
+PEAKELO-size: 26
+PEAKELO-color: 255,133,133
+PEAKELO-pixels: 486,28
 
-wins-pixels: 751,393
-winstreak-pixels: 833,428
-losses-pixels: 799,463
-losestreak-pixels: 862,497
+WINS-size: 34
+WINS-color: 255,133,133
+WINS-pixels: 142,243
 
-skin-pixels: 200,200
+WINSTREAK-size: 34
+WINSTREAK-color: 255,133,133
+WINSTREAK-pixels: 237,381
+
+HIGHESTWS-size: 34
+HIGHESTWS-color: 255,133,133
+HIGHESTWS-pixels: 240,416
+
+LOSSES-size: 34
+LOSSES-color: 255,133,133
+LOSSES-pixels: 199,278
+
+LOSSSTREAK-size: 30
+LOSSSTREAK-color: 255,255,255
+LOSSSTREAK-pixels: 9999,9999
+
+HIGHESTLS-size: 30
+HIGHESTLS-color: 255,255,255
+HIGHESTLS-pixels: 9999,9999
+
+GAMES-size: 34
+GAMES-color: 255,133,133
+GAMES-pixels: 187,209
+
+WLR-size: 34
+WLR-color: 255,133,133
+WLR-pixels: 137,312
+
+MVP-size: 34
+MVP-color: 255,133,133
+MVP-pixels: 137,486
+
+KILLS-size: 34
+KILLS-color: 255,133,133
+KILLS-pixels: 727,270
+
+DEATHS-size: 34
+DEATHS-color: 255,133,133
+DEATHS-pixels: 775,305
+
+KDR-size: 34
+KDR-color: 255,133,133
+KDR-pixels: 722,338
+
+STRIKES-size: 34
+STRIKES-color: 255,133,133
+STRIKES-pixels: 779,405
+
+SCORED-size: 34
+SCORED-color: 255,133,133
+SCORED-pixels: 782,438
+
+rbw-rank-size: 26
+# color - role color
+rbw-rank-pixels: 421,53
+
+GOLD-size: 40
+GOLD-color: 247,199,42
+GOLD-pixels: 627,45
+
+LEVEL-size: 36
+LEVEL-color: 86,189,42
+LEVEL-pixels: 800,42
+
+XP-size: 24
+XP-color: 153,255,110
+XP-pixels: 870,28
+
+needed-xp-size: 24
+needed-xp-color: 53,179,0
+needed-xp-pixels: 870,53
+
+# theme name
+theme-size: 30
+theme-color: 255,255,255
+theme-pixels: 9999,9999
+
+# if player is banned the text will be "BANNED"
+# if player is not banned this won't even be displayed
+banned-size: 30
+banned-color: 255,255,255
+banned-pixels: 9999,9999
+
+clan-size: 34
+clan-color: 255,255,255
+clan-pixels: 9999,9999
+
+skin-pixels: 365,100
 skin-size: 400
+
+#============================== CLAN STATS IMAGE
+
+# configure the size, color and pixels location of where the values (numbers/text for a certain stat) are displayed
+# or write big numbers (like 9999,9999) to disable showing those values
+
+# yes this is a big one, but I really wanted to give u full control
+# over the stats img so u can make whatever you want
+
+name-size: 44
+name-color: 255,255,255
+name-pixels: 375,78
+
+reputation-size: 44
+reputation-color: 242,66,54
+reputation-pixels: 206,78
+
+description-size: 30
+description-color: 255,255,255
+description-pixels: 202,146
+
+ranking-size: 34
+ranking-color: 242,66,54
+ranking-pixels: 244,232
+
+xp-size: 34
+xp-color: 242,66,54
+xp-pixels: 150,307
+
+level-size: 34
+level-color: 242,66,54
+level-pixels: 207,345
+
+allelo-size: 34
+allelo-color: 242,66,54
+allelo-pixels: 191,422
+
+allgold-size: 34
+allgold-color: 242,66,54
+allgold-pixels: 202,459
+
+members-size: 34
+members-color: 242,66,54
+members-pixels: 519,223
+
+invited-size: 34
+invited-color: 242,66,54
+invited-pixels: 490,263
+
+cwplayed-size: 34
+cwplayed-color: 242,66,54
+cwplayed-pixels: 515,336
+
+cwwins-size: 34
+cwwins-color: 242,66,54
+cwwins-pixels: 466,374
+
+cwlosses-size: 34
+cwlosses-color: 242,66,54
+cwlosses-pixels: 525,412
+
+cwwlr-size: 34
+cwwlr-color: 242,66,54
+cwwlr-pixels: 458,489
+
+leaderign-size: 34
+leaderign-color: 255,255,255
+leaderign-pixels: 650,225
+
+icon-pixels: 20,20
+
+leaderskin-size: 240
+leaderskin-pixels: 725,259

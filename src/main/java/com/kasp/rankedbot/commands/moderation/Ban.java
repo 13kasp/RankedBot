@@ -50,7 +50,7 @@ public class Ban extends Command {
         }
 
         if (player.ban(unban, reason)) {
-            Embed embed = new Embed(EmbedType.DEFAULT, "`" + player.getIgn() + " has been banned`", "Please do `=fix` to get unbanned after the time is over\nIf you think this is a false ban feel free to appeal", 1);
+            Embed embed = new Embed(EmbedType.DEFAULT, "`" + player.getIgn() + " has been banned`", "Please do `=fix` if you're still not unbanned after the time is over\nIf you think this is a false ban feel free to appeal / contact staff", 1);
             embed.addField("Ban duration", duration, false);
             embed.addField("Reason", reason, false);
 

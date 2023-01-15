@@ -5,6 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.levelsfile.Levels;
 import com.kasp.rankedbot.messages.Msg;
 import com.kasp.rankedbot.perms.Perms;
 import net.dv8tion.jda.api.entities.Guild;
@@ -28,6 +29,7 @@ public class ReloadConfigCmd extends Command {
         Config.reload();
         Msg.reload();
         Perms.reload();
+        Levels.reload();
 
         Embed reply = new Embed(EmbedType.SUCCESS, "Reloaded", "New values were successfully loaded into memory", 1);
         msg.replyEmbeds(reply.build()).queue();

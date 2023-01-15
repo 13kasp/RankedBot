@@ -5,6 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.Statistic;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
+import com.kasp.rankedbot.instance.cache.LevelCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.messages.Msg;
@@ -27,7 +28,20 @@ public class ModifyCmd extends Command {
         }
 
         String ID = args[1].replaceAll("[^0-9]","");
-        Statistic stat = Statistic.valueOf(args[2].toUpperCase());
+        Statistic stat;
+
+        try {
+            stat = Statistic.valueOf(args[2].toUpperCase());
+        } catch (Exception e) {
+            String stats = "";
+            for (Statistic s : Statistic.values()) {
+                stats += "`" + s + "` ";
+            }
+            Embed embed = new Embed(EmbedType.ERROR, "Error", "**This statistic does not exist**\nAvailable stats: " + stats, 1);
+            msg.replyEmbeds(embed.build()).queue();
+            return;
+        }
+
         int amount = Integer.parseInt(args[3]);
 
         Player player = PlayerCache.getPlayer(ID);
@@ -72,15 +86,15 @@ public class ModifyCmd extends Command {
                 embed.setDescription("Player's gold: " + (player.getGold() - amount) + " > " + player.getGold());
                 break;
             case LEVEL:
-                player.setLevel(player.getLevel() + amount);
-                embed.setDescription("Player's level: " + (player.getLevel() - amount) + " > " + player.getLevel());
+                player.setLevel(LevelCache.getLevel(player.getLevel().getLevel() + amount));
+                embed.setDescription("Player's level: " + (player.getLevel().getLevel() - amount) + " > " + player.getLevel().getLevel());
                 break;
             case XP:
                 player.setXp(player.getXp() + amount);
                 embed.setDescription("Player's xp: " + (player.getXp() - amount) + " > " + player.getXp());
                 break;
             default:
-                Embed error = new Embed(EmbedType.ERROR, "Unknown Stat", "Must be `ELO`/`WINS`/`LOSSES`/`MVP`/`KILLS`/`DEATHS`/`STRIKES`/`SCORED`/`GOLD`/`LEVEL`/`XP`", 1);
+                Embed error = new Embed(EmbedType.ERROR, "Error", "You cannot modify this statistic", 1);
                 msg.replyEmbeds(error.build()).queue();
                 return;
         }

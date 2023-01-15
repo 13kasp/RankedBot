@@ -1,11 +1,14 @@
 package com.kasp.rankedbot;
 
 import com.kasp.rankedbot.commands.CommandManager;
+import com.kasp.rankedbot.commands.moderation.UnbanTask;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.*;
+import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.embed.PagesEvents;
+import com.kasp.rankedbot.levelsfile.Levels;
 import com.kasp.rankedbot.listener.QueueJoin;
 import com.kasp.rankedbot.listener.ServerJoin;
 import com.kasp.rankedbot.messages.Msg;
@@ -42,10 +45,13 @@ public class RankedBot {
         new File("RankedBot/queues").mkdirs();
         new File("RankedBot/fonts").mkdirs();
         new File("RankedBot/themes").mkdirs();
+        new File("RankedBot/clans").mkdirs();
 
         Config.loadConfig();
         Perms.loadPerms();
         Msg.loadMsg();
+        Levels.loadLevels();
+        Levels.loadClanLevels();
 
         Yaml yaml = new Yaml();
         Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/config.yml"));
@@ -82,49 +88,68 @@ public class RankedBot {
 
         ServerStats.setGamesPlayed(Integer.parseInt(serverStatsData.get("games-played").toString()));
 
-        if (new File("RankedBot/ranks").listFiles().length > 0) {
-            for (File f : new File("RankedBot/ranks").listFiles()) {
-                new Rank(f.getName().replaceAll(".yml", ""));
-            }
-        }
-
-        if (new File("RankedBot/maps").listFiles().length > 0) {
-            for (File f : new File("RankedBot/maps").listFiles()) {
-                new GameMap(f.getName().replaceAll(".yml", ""));
-            }
-        }
-
-        if (new File("RankedBot/queues").listFiles().length > 0) {
-            for (File f : new File("RankedBot/queues").listFiles()) {
-                new Queue(f.getName().replaceAll(".yml", ""));
-            }
-        }
-
-        if (new File("RankedBot/themes").listFiles().length > 0) {
-            for (File f : new File("RankedBot/themes").listFiles()) {
-                new Theme(f.getName().replaceAll(".png", ""));
-            }
-        }
-
-        if (new File("RankedBot/players").listFiles().length > 0) {
-            for (File f : new File("RankedBot/players").listFiles()) {
-                new Player(f.getName().replaceAll(".yml", ""));
-            }
-        }
-
-        if (new File("RankedBot/games").listFiles().length > 0) {
-            for (File f : new File("RankedBot/games").listFiles()) {
-                new Game(Integer.parseInt(f.getName().replaceAll(".yml", "")));
-            }
-        }
-
-        System.out.println("Finishing up... this might take around 10 seconds");
+        System.out.println("\n[!] Finishing up... this might take around 10 seconds\n");
 
         // get guild
         TimerTask task = new TimerTask () {
             @Override
             public void run () {
                 guild = jda.getGuilds().get(0);
+
+                if (new File("RankedBot/ranks").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/ranks").listFiles()) {
+                        new Rank(f.getName().replaceAll(".yml", ""));
+                    }
+                }
+
+                if (new File("RankedBot/maps").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/maps").listFiles()) {
+                        new GameMap(f.getName().replaceAll(".yml", ""));
+                    }
+                }
+
+                if (new File("RankedBot/queues").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/queues").listFiles()) {
+                        new Queue(f.getName().replaceAll(".yml", ""));
+                    }
+                }
+
+                if (new File("RankedBot/themes").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/themes").listFiles()) {
+                        new Theme(f.getName().replaceAll(".png", ""));
+                    }
+                }
+
+                for (int i = 0; i <= Integer.parseInt(Levels.levelsData.get("total-levels")); i++) {
+                    new Level(i);
+                }
+
+                for (int i = 0; i <= Integer.parseInt(Levels.clanLevelsData.get("total-levels")); i++) {
+                    new ClanLevel(i);
+                }
+
+                if (new File("RankedBot/players").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/players").listFiles()) {
+                        new Player(f.getName().replaceAll(".yml", ""));
+                    }
+                }
+
+                if (new File("RankedBot/games").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/games").listFiles()) {
+                        try {
+                            new Game(Integer.parseInt(f.getName().replaceAll(".yml", "")));
+                        } catch (Exception e) {
+                            System.out.println("Game " + f.getName().replaceAll(".yml", "") + " could not be loaded.");
+                        }
+                    }
+                }
+
+                if (new File("RankedBot/clans").listFiles().length > 0) {
+                    for (File f : new File("RankedBot/clans").listFiles()) {
+                        if (!f.getName().endsWith(".png"))
+                            new Clan(f.getName());
+                    }
+                }
 
                 System.out.println("-------------------------------");
 
@@ -153,10 +178,23 @@ public class RankedBot {
                 }
                 ServerStats.save();
                 System.out.println("- Games data successfully saved");
+                for (Clan c : ClanCache.getClans().values()) {
+                    c.writeFile();
+                }
+                System.out.println("- Clans data successfully saved");
             }
         };
 
         new Timer().schedule(hourlyTask, 1000*60*60*2, 1000*60*60*2);
+
+        TimerTask unbanTask = new TimerTask () {
+            @Override
+            public void run () {
+                UnbanTask.checkAndUnbanPlayers();
+            }
+        };
+
+        new Timer().schedule(unbanTask, 1000 * 60 * 60, 1000 * 60 * 60);
     }
 
     public static Guild getGuild() {
