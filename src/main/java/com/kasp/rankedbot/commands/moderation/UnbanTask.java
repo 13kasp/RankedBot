@@ -5,7 +5,7 @@ import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

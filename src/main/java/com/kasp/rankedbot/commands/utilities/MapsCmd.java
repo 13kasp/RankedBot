@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.GameMap;
 import com.kasp.rankedbot.instance.cache.MapCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -27,7 +27,7 @@ public class MapsCmd extends Command {
 
         String maps = "";
         for (GameMap m : MapCache.getMaps().values()) {
-            maps += "**" + m.getName() + "** — `Height: " + m.getHeight() + "` (" + m.getTeam1() + " vs " + m.getTeam1() + ")\n";
+            maps += "**" + m.getName() + "** — `Height: " + m.getHeight() + "` (" + m.getTeam1() + " vs " + m.getTeam2() + ")\n";
         }
 
         Embed embed;

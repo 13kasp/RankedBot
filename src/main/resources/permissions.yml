@@ -1,5 +1,5 @@
 # Put Role IDS here (you can put multiple IDS separated by ",")
-# Example: 955865900916043797,955865900916873792,95586590078873791
+# example: 955865900916043797,955865900916873792,95586590078873791
 # write "everyone" instead of an id to make it so everyone can use the command
 # leave blank to disable the command
 
@@ -20,6 +20,7 @@ stats: everyone
 leaderboard: everyone
 modify: everyone
 screenshare: everyone
+transfergold: everyone
 
 # party commands
 partycreate: everyone
@@ -29,6 +30,7 @@ partyleave: everyone
 partylist: everyone
 partypromote: everyone
 partywarp: everyone
+partykick: everyone
 
 # game commands
 queue: everyone
@@ -41,6 +43,8 @@ score: everyone
 undogame: everyone
 win: everyone
 lose: everyone
+forcevoid: everyone
+call: everyone
 
 # utilities commands
 addqueue: everyone
@@ -62,7 +66,6 @@ theme: everyone
 ban: everyone
 unban: everyone
 baninfo: everyone
-bans: everyone
 strike: everyone
 
 # clan
@@ -74,3 +77,14 @@ clanleave: everyone
 clanstats: everyone
 clanforcedisband: everyone
 clankick: everyone
+clansettings: everyone
+claninfo: everyone
+clanlb: everyone
+clanlist: everyone
+
+# clan war
+cwcreate: everyone
+cwcancel: everyone
+cwregister: everyone
+cwunregister: everyone
+cwstart: everyone

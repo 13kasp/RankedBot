@@ -1,4 +1,4 @@
-package com.kasp.rankedbot.instance.embed;
+package com.kasp.rankedbot.instance;
 
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.RankedBot;

@@ -1,12 +1,13 @@
-package com.kasp.rankedbot.commands.queue;
+package com.kasp.rankedbot.commands.utilities;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.PickingMode;
 import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.database.SQLUtilsManager;
 import com.kasp.rankedbot.instance.Queue;
 import com.kasp.rankedbot.instance.cache.QueueCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
 
@@ -51,7 +52,7 @@ public class AddQueueCmd extends Command {
 
         boolean casual = Boolean.parseBoolean(args[4]);
 
-        Queue.createFile(ID, playersEachTeam, pickingMode, casual);
+        SQLUtilsManager.createQueue(ID, playersEachTeam, pickingMode, casual);
         new Queue(ID);
 
         Embed embed = new Embed(EmbedType.SUCCESS, "✅ successfully added `" + vc.getName() + "` queue", "", 1);

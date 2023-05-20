@@ -4,7 +4,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;

@@ -9,7 +9,7 @@ import com.kasp.rankedbot.instance.Game;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -42,7 +42,7 @@ public class ScoreCmd extends Command {
 
         Game game = GameCache.getGame(number);
 
-        if (game.getState() != GameState.SUBMITTED) {
+        if (!sender.getUser().isBot() && game.getState() != GameState.SUBMITTED) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-submitted"), 1);
             msg.replyEmbeds(reply.build()).queue();
             return;
@@ -65,7 +65,7 @@ public class ScoreCmd extends Command {
 
         game.scoreGame(winningTeam, losingTeam, PlayerCache.getPlayer(mvpID), sender);
 
-        Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` has been scored", "", 1);
+        Embed embed = new Embed(EmbedType.DEFAULT, "Game `#" + game.getNumber() + "` has been scored", "", 1);
 
         String team1 = "";
         for (Player p : game.getTeam1()) {
@@ -90,6 +90,11 @@ public class ScoreCmd extends Command {
             guild.getTextChannelById(Config.getValue("scored-announcing")).sendMessageEmbeds(embed.build()).queue();
         }
 
-        msg.replyEmbeds(embed.build()).queue();
+        Embed reply = new Embed(EmbedType.SUCCESS, "", "You have scored Game`#" + game.getNumber() + "`", 1);
+        msg.replyEmbeds(reply.build()).queue();
+
+        if (guild.getTextChannelById(game.getChannelID()) != null) {
+            guild.getTextChannelById(game.getChannelID()).sendMessageEmbeds(embed.build()).queue();
+        }
     }
 }

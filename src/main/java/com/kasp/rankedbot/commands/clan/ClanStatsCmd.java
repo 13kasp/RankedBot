@@ -9,7 +9,7 @@ import com.kasp.rankedbot.instance.Leaderboard;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,8 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClanStatsCmd extends Command {
     public ClanStatsCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
@@ -101,7 +101,14 @@ public class ClanStatsCmd extends Command {
                     icon = ImageIO.read(new File("RankedBot/clans/icon.png").toURI().toURL());
                 }
 
-                BufferedImage skin = ImageIO.read(new URL(skinlink));
+                BufferedImage skin;
+                try {
+                    skin = ImageIO.read(new URL(skinlink));
+                } catch (Exception e) {
+                    Embed embed = new Embed(EmbedType.ERROR, "Something went wrong...", "Please try executing this command again", 1);
+                    msg.replyEmbeds(embed.build()).queue();
+                    return;
+                }
 
                 Graphics2D gfx = (Graphics2D) image.getGraphics();
 
@@ -112,9 +119,9 @@ public class ClanStatsCmd extends Command {
                 // icon
                 gfx.drawImage(icon, Integer.parseInt(Config.getValue("icon-pixels").split(",")[0]), Integer.parseInt(Config.getValue("icon-pixels").split(",")[1]), null);
 
-                Map<Clan, Integer> clanLB = new HashMap<>(Leaderboard.getClansLeaderboard());
+                List<Clan> clanLB = new ArrayList<>(Leaderboard.getClansLeaderboard());
 
-                drawText(gfx, "ranking", "#" + (clanLB.get(clan) + 1));
+                drawText(gfx, "ranking", "#" + (clanLB.indexOf(clan) + 1));
                 drawText(gfx, "xp", clan.getXp() + "");
                 drawText(gfx, "level", clan.getLevel().getLevel() + "");
 

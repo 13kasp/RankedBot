@@ -2,8 +2,9 @@ package com.kasp.rankedbot.commands.player;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
+import com.kasp.rankedbot.database.SQLPlayerManager;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,7 +32,7 @@ public class RegisterCmd extends Command {
             return;
         }
 
-        String ign = args[1].replaceAll("[^a-zA-Z0-9]+","");
+        String ign = args[1].replaceAll("[^a-zA-Z0-9_-]", "");
         ign = ign.replaceAll(" ", "").trim();
 
         if (ign.length() > 16) {
@@ -40,7 +41,7 @@ public class RegisterCmd extends Command {
             return;
         }
 
-        Player.writeFile(sender.getId(), ign);
+        SQLPlayerManager.createPlayer(sender.getId(), ign);
         Player player = new Player(sender.getId());
         player.fix();
 

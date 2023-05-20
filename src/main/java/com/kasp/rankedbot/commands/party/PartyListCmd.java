@@ -8,7 +8,7 @@ import com.kasp.rankedbot.instance.Party;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,9 +38,17 @@ public class PartyListCmd extends Command {
         }
 
         if (PartyCache.getParty(PlayerCache.getPlayer(ID)) == null) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-in-party"), 1);
+            Embed reply;
+            if (args.length == 1) {
+                reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-in-party"), 1);
+            }
+            else {
+                reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("player-not-in-party"), 1);
+            }
+
             msg.replyEmbeds(reply.build()).queue();
             return;
+
         }
 
         Party party = PartyCache.getParty(PlayerCache.getPlayer(ID));

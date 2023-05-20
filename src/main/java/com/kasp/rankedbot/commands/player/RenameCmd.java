@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -25,7 +25,7 @@ public class RenameCmd extends Command {
             return;
         }
 
-        String ign = args[1].replaceAll("[^a-zA-Z0-9]+","");
+        String ign = args[1].replaceAll("[^a-zA-Z0-9_-]", "");
         ign = ign.replaceAll(" ", "").trim();
 
         if (ign.length() > 16) {

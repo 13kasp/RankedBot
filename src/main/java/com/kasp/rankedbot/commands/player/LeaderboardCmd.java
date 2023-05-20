@@ -7,7 +7,7 @@ import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Leaderboard;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

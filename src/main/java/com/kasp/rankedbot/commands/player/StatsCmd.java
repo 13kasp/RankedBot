@@ -5,16 +5,17 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.Statistic;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.LevelCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.cache.ThemeCache;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,7 +23,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 
 public class StatsCmd extends Command {
@@ -70,19 +73,20 @@ public class StatsCmd extends Command {
         }
 
         if (Boolean.parseBoolean(Config.getValue("s-enabled"))) {
-            if (new File("RankedBot/themes/default.png").exists()) {
-                Document document = null;
+            if (ThemeCache.getTheme("default") != null) {
+                String uuid = null;
                 try {
-                    document = Jsoup.connect("https://api.mineatar.io/uuid/" + player.getIgn()).get();
-                } catch (IOException ignored) {}
+                    uuid = new JSONObject(IOUtils.toString(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player.getIgn()), StandardCharsets.UTF_8)).getString("id");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 String skinlink;
-                if (document != null) {
-                    String UUID = document.body().text();
-                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/" + UUID;
+                if (uuid != null) {
+                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/" + uuid;
                 }
                 else {
-                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/069a79f4-44e9-4726-a5be-fca90e38aaf5";
+                    skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/75a0352f17b64119a041d0be09701235";
                 }
 
                 try {
@@ -92,7 +96,15 @@ public class StatsCmd extends Command {
                     ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("RankedBot/fonts/stats.otf")));
 
                     BufferedImage image = ImageIO.read(new File("RankedBot/themes/" + player.getTheme().getName() + ".png").toURI().toURL());
-                    BufferedImage skin = ImageIO.read(new URL(skinlink));
+
+                    BufferedImage skin;
+                    try {
+                        skin = ImageIO.read(new URL(skinlink));
+                    } catch (Exception e) {
+                        Embed embed = new Embed(EmbedType.ERROR, "Something went wrong...", "Please try executing this command again", 1);
+                        msg.replyEmbeds(embed.build()).queue();
+                        return;
+                    }
 
                     Graphics2D gfx = (Graphics2D) image.getGraphics();
 
@@ -110,11 +122,11 @@ public class StatsCmd extends Command {
                         gfx.setColor(new Color(Integer.parseInt(Config.getValue(s + "-color").split(",")[0]),
                                 Integer.parseInt(Config.getValue(s + "-color").split(",")[1]),
                                 Integer.parseInt(Config.getValue(s + "-color").split(",")[2])));
-                        if (s != Statistic.WLR) {
-                            gfx.drawString((int) player.getStatistic(s) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
+                        if (s == Statistic.WLR || s == Statistic.KDR){
+                            gfx.drawString(f.format(player.getStatistic(s)) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
                         }
                         else {
-                            gfx.drawString(f.format(player.getStatistic(s)) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
+                            gfx.drawString((int) player.getStatistic(s) + "", Integer.parseInt(Config.getValue(s + "-pixels").split(",")[0]), Integer.parseInt(Config.getValue(s + "-pixels").split(",")[1]));
                         }
                     }
 
@@ -191,7 +203,7 @@ public class StatsCmd extends Command {
                         "\n> ┗ `Peak` " + player.getPeakElo() + " **(#" + player.getPlacement(Statistic.PEAKELO) + ")**" +
                         "\n> `Games` " + games + " **(#" + player.getPlacement(Statistic.GAMES) + ")**" +
                         "\n> `WLR` " + f.format(player.getWins() / templosses) + " **(#" + player.getPlacement(Statistic.WLR) + ")**" +
-                        "\n> `Mvp` " + player.getMvp() + " **(#" + player.getPlacement(Statistic.WLR) + ")**" +
+                        "\n> `Mvp` " + player.getMvp() + " **(#" + player.getPlacement(Statistic.MVP) + ")**" +
                         "\n> `Strikes` " + player.getStrikes() + " **(#" + player.getPlacement(Statistic.STRIKES) + ")**" +
                         "\n> `Scored` " + player.getScored() + " **(#" + player.getPlacement(Statistic.SCORED) + ")**", false);
 
@@ -203,17 +215,30 @@ public class StatsCmd extends Command {
                         "\n> `Losestreak` " + player.getLossStreak() + " **(#" + player.getPlacement(Statistic.LOSSSTREAK) + ")**" +
                         "\n> ┗ `Highest` " + player.getHighestLS() + " **(#" + player.getPlacement(Statistic.HIGHESTLS) + ")**", false);
 
-        StringBuilder themes = new StringBuilder();
-        for (Theme t : player.getOwnedThemes()) {
-            themes.append("`" + t.getName() + "` ");
-        }
+        embed.addField("__K/D Stats__",
+                "> `Kills` " + player.getKills() + " **(#" + player.getPlacement(Statistic.KILLS) + ")**" +
+                        "\n> `Deaths` " + player.getDeaths() + " **(#" + player.getPlacement(Statistic.DEATHS) + ")**" +
+                        "\n> `KDR` " + player.getHighestWS() + " **(#" + player.getPlacement(Statistic.KDR) + ")**", false);
 
-        embed.addField("__Other Stats__",
-                "> `Gold` " + player.getGold() + " **(#" + player.getPlacement(Statistic.GOLD) + ")**" +
-                        "\n> `Level` " + player.getLevel() + " **(#" + player.getPlacement(Statistic.LEVEL) + ")**" +
-                        "\n> `Xp` " + player.getXp() + " **(#" + player.getPlacement(Statistic.XP) + ")**" +
-                        "\n> `Selected theme` " + player.getTheme().getName() +
-                        "\n> `Owned themes` " + themes, false);
+        if (player.getOwnedThemes().get(0) == null) {
+            embed.addField("__Other Stats__",
+                    "> `Gold` " + player.getGold() + " **(#" + player.getPlacement(Statistic.GOLD) + ")**" +
+                            "\n> `Level` " + player.getLevel().getLevel() + " **(#" + player.getPlacement(Statistic.LEVEL) + ")**" +
+                            "\n> `Xp` " + player.getXp() + " **(#" + player.getPlacement(Statistic.XP) + ")**", false);
+        }
+        else {
+            StringBuilder themes = new StringBuilder();
+            for (Theme t : player.getOwnedThemes()) {
+                themes.append(t.getName() + " ");
+            }
+
+            embed.addField("__Other Stats__",
+                    "> `Gold` " + player.getGold() + " **(#" + player.getPlacement(Statistic.GOLD) + ")**" +
+                            "\n> `Level` " + player.getLevel().getLevel() + " **(#" + player.getPlacement(Statistic.LEVEL) + ")**" +
+                            "\n> `Xp` " + player.getXp() + " **(#" + player.getPlacement(Statistic.XP) + ")**" +
+                            "\n> `Selected theme` " + player.getTheme().getName() +
+                            "\n> `Owned themes` " + themes, false);
+        }
 
         return embed;
     }

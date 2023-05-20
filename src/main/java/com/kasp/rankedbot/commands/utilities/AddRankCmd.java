@@ -3,9 +3,10 @@ package com.kasp.rankedbot.commands.utilities;
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.database.SQLUtilsManager;
 import com.kasp.rankedbot.instance.Rank;
 import com.kasp.rankedbot.instance.cache.RankCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
 
@@ -44,7 +45,7 @@ public class AddRankCmd extends Command {
         String loseElo = args[5];
         String mvpElo = args[6];
 
-        Rank.createFile(ID, startingElo, endingElo, winElo, loseElo, mvpElo);
+        SQLUtilsManager.createRank(ID, startingElo, endingElo, winElo, loseElo, mvpElo);
         new Rank(ID);
 
         Embed success = new Embed(EmbedType.SUCCESS, "✅ successfully added `" + role.getName() + "` rank", "", 1);

@@ -6,7 +6,7 @@ import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Queue;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.cache.QueueCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

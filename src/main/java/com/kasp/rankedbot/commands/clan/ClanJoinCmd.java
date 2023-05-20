@@ -8,7 +8,7 @@ import com.kasp.rankedbot.instance.Clan;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -44,16 +44,33 @@ public class ClanJoinCmd extends Command {
 
         Clan clan = ClanCache.getClan(args[1]);
 
-        if (!clan.getInvitedPlayers().contains(player)) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("clan-not-invited"), 1);
-            msg.replyEmbeds(reply.build()).queue();
-            return;
-        }
+        if (!clan.isPrivate()) {
+            if (clan.getMembers().size() >= Integer.parseInt(Config.getValue("l" + clan.getLevel().getLevel()))) {
+                Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("clan-max-players"), 1);
+                msg.replyEmbeds(reply.build()).queue();
+                return;
+            }
 
-        if (clan.getMembers().size() >= Integer.parseInt(Config.getValue("l" + clan.getLevel().getLevel()))) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("clan-max-players"), 1);
-            msg.replyEmbeds(reply.build()).queue();
-            return;
+            if (player.getElo() < clan.getEloJoinReq()) {
+                Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("not-enough-elo-join"), 1);
+                msg.replyEmbeds(reply.build()).queue();
+                return;
+            }
+        }
+        else {
+            if (!clan.getInvitedPlayers().contains(player)) {
+                Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("clan-not-invited"), 1);
+                msg.replyEmbeds(reply.build()).queue();
+                return;
+            }
+
+            if (clan.getMembers().size() >= Integer.parseInt(Config.getValue("l" + clan.getLevel().getLevel()))) {
+                Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("clan-max-players"), 1);
+                msg.replyEmbeds(reply.build()).queue();
+                return;
+            }
+
+            clan.getInvitedPlayers().remove(player);
         }
 
         clan.getMembers().add(player);

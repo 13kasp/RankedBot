@@ -31,7 +31,9 @@ public class Config {
             Yaml yaml = new Yaml();
             Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/config.yml"));
             for (String s : data.keySet()) {
-                configData.put(s, data.get(s).toString());
+                if (data.get(s) != null) {
+                    configData.put(s, data.get(s).toString());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

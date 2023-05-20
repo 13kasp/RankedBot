@@ -4,18 +4,19 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.RankedBot;
 import com.kasp.rankedbot.Statistic;
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.database.SQLPlayerManager;
+import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.*;
-import com.kasp.rankedbot.instance.embed.Embed;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Player {
 
@@ -44,41 +45,45 @@ public class Player {
     private String banReason;
 
     public Player(String ID) {
+        System.out.println("ID: " + ID);
         this.ID = ID;
 
-        try {
-            Yaml yaml = new Yaml();
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/players/" + ID + ".yml"));
+        ResultSet resultSet = SQLite.queryData("SELECT * FROM players WHERE discordID='" + ID + "';");
 
-            this.ign = data.get("name").toString();
-            this.elo = Integer.parseInt(data.get("elo").toString());
-            this.peakElo = Integer.parseInt(data.get("peak-elo").toString());
-            this.wins = Integer.parseInt(data.get("wins").toString());
-            this.losses = Integer.parseInt(data.get("losses").toString());
-            this.winStreak = Integer.parseInt(data.get("win-streak").toString());
-            this.lossStreak = Integer.parseInt(data.get("loss-streak").toString());
-            this.highestWS = Integer.parseInt(data.get("highest-ws").toString());
-            this.highestLS = Integer.parseInt(data.get("highest-ls").toString());
-            this.mvp = Integer.parseInt(data.get("mvp").toString());
-            this.kills = Integer.parseInt(data.get("kills").toString());
-            this.deaths = Integer.parseInt(data.get("deaths").toString());
-            this.strikes = Integer.parseInt(data.get("strikes").toString());
-            this.scored = Integer.parseInt(data.get("scored").toString());
-            this.gold = Integer.parseInt(data.get("gold").toString());
-            this.level = LevelCache.getLevel(Integer.parseInt(data.get("level").toString()));
-            this.xp = Integer.parseInt(data.get("xp").toString());
-            this.theme = ThemeCache.getTheme(data.get("theme").toString());
+        try {
+            this.ign = resultSet.getString(3);
+            this.elo = resultSet.getInt(4);
+            this.peakElo = resultSet.getInt(5);
+            this.wins = resultSet.getInt(6);
+            this.losses = resultSet.getInt(7);
+            this.winStreak = resultSet.getInt(8);
+            this.lossStreak = resultSet.getInt(9);
+            this.highestWS = resultSet.getInt(10);
+            this.highestLS = resultSet.getInt(11);
+            this.mvp = resultSet.getInt(12);
+            this.kills = resultSet.getInt(13);
+            this.deaths = resultSet.getInt(14);
+            this.strikes = resultSet.getInt(15);
+            this.scored = resultSet.getInt(16);
+            this.gold = resultSet.getInt(17);
+            this.level = LevelCache.getLevel(resultSet.getInt(18));
+            this.xp = resultSet.getInt(19);
+            this.theme = ThemeCache.getTheme(resultSet.getString(20));
 
             ownedThemes = new ArrayList<>();
 
-            String[] themes = data.get("owned-themes").toString().split(",");
+            String[] themes = resultSet.getString(21).split(",");
             for (String s : themes) {
                 ownedThemes.add(ThemeCache.getTheme(s));
             }
 
-            this.isBanned = Boolean.parseBoolean(data.get("is-banned").toString());
-
-        } catch (FileNotFoundException e) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            this.isBanned = Boolean.parseBoolean(resultSet.getString(22));
+            if (isBanned) {
+                this.bannedTill = LocalDateTime.parse(resultSet.getString(23), formatter);
+                this.banReason = resultSet.getString(24);
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -87,19 +92,25 @@ public class Player {
 
     public void fix() {
         Guild guild = RankedBot.getGuild();
-        Member member = guild.getMemberById(ID);
+
+        Member member = null;
+        if (guild.getMemberById(ID) != null) {
+            member = guild.getMemberById(ID);
+        }
 
         ArrayList<Role> rolestoremove = new ArrayList<>();
         ArrayList<Role> rolestoadd = new ArrayList<>();
 
         rolestoadd.add(guild.getRoleById(Config.getValue("registered-role")));
 
-        Rank rank = getRank();
-        rolestoadd.add(guild.getRoleById(rank.getID()));
+        if (getRank() != null) {
+            Rank rank = getRank();
+            rolestoadd.add(guild.getRoleById(rank.getID()));
 
-        for (Rank r : RankCache.getRanks().values()) {
-            if (rank != r) {
-                rolestoremove.add(guild.getRoleById(r.getID()));
+            for (Rank r : RankCache.getRanks().values()) {
+                if (rank != r) {
+                    rolestoremove.add(guild.getRoleById(r.getID()));
+                }
             }
         }
 
@@ -115,81 +126,83 @@ public class Player {
             rolestoremove.add(guild.getRoleById(Config.getValue("banned-role")));
         }
 
-        guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
-        member.modifyNickname(Config.getValue("elo-formatting").replaceAll("%elo%", elo + "") + ign).queue();
+        if (member != null) {
+            guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
+            member.modifyNickname(Config.getValue("elo-formatting").replaceAll("%elo%", elo + "") + ign).queue();
+        }
     }
 
     public void wipe() {
-        elo = Integer.parseInt(Config.getValue("starting-elo"));
-        peakElo = Integer.parseInt(Config.getValue("starting-elo"));
-        wins = 0;
-        losses = 0;
-        winStreak = 0;
-        lossStreak = 0;
-        highestWS = 0;
-        highestLS = 0;
-        mvp = 0;
-        kills = 0;
-        deaths = 0;
+        setElo(Integer.parseInt(Config.getValue("starting-elo")));
+        setPeakElo(Integer.parseInt(Config.getValue("starting-elo")));
+        setWins(0);
+        setLosses(0);
+        setWinStreak(0);
+        setLossStreak(0);
+        setHighestWS(0);
+        setHighestLS(0);
+        setMvp(0);
+        setKills(0);
+        setDeaths(0);
     }
 
-    public void win() {
+    public void win(double eloMultiplier) {
         if (Boolean.parseBoolean(Config.getValue("levels-enabled"))) {
-            updateXP(Integer.parseInt(Config.getValue("play-xp")));
-            updateXP(Integer.parseInt(Config.getValue("win-xp")));
+            updateXP(Integer.parseInt(Config.getValue("play-xp")), Integer.parseInt(Config.getValue("clanxp-play")));
+            updateXP(Integer.parseInt(Config.getValue("win-xp")), Integer.parseInt(Config.getValue("clanxp-win")));
         }
 
-        wins++;
-        winStreak++;
-        elo += getRank().getWinElo();
+        setWins(wins+1);
+        setWinStreak(winStreak+1);
+        setElo(elo += getRank().getWinElo() * eloMultiplier);
 
         if (peakElo < elo) {
-            peakElo = elo;
+            setPeakElo(elo);
         }
 
         if (lossStreak > 0) {
-            lossStreak = 0;
+            setLossStreak(0);
         }
 
         if (highestWS < winStreak) {
-            highestWS = winStreak;
+            setHighestWS(winStreak);
         }
     }
 
-    public void lose() {
+    public void lose(double eloMultiplier) {
         if (Boolean.parseBoolean(Config.getValue("levels-enabled"))) {
-            updateXP(Integer.parseInt(Config.getValue("play-xp")));
+            updateXP(Integer.parseInt(Config.getValue("play-xp")), Integer.parseInt(Config.getValue("clanxp-play")));
         }
 
-        losses++;
-        lossStreak++;
+        setLosses(losses+1);
+        setLossStreak(lossStreak+1);
 
-        if (elo - getRank().getLoseElo() > 0) {
-            elo -= getRank().getLoseElo();
+        if (elo - getRank().getLoseElo() * eloMultiplier > 0) {
+            setElo(elo -= getRank().getLoseElo() * eloMultiplier);
         }
         else {
-            elo = 0;
+            setElo(0);
         }
 
         if (winStreak > 0) {
-            winStreak = 0;
+            setWinStreak(0);
         }
 
         if (highestLS < lossStreak) {
-            highestLS = lossStreak;
+            setHighestLS(lossStreak);
         }
     }
 
-    public void updateXP(int addXp) {
-        xp+=addXp;
+    public void updateXP(int addXp, int addClanXP) {
+        setXp(xp+=addXp);
 
         for (int i = level.getLevel()+1; i < LevelCache.getLevels().size(); i++) {
             if (xp >= LevelCache.getLevel(i).getNeededXP()) {
-                level = LevelCache.getLevel(i);
+                setLevel(LevelCache.getLevel(i));
 
                 for (String s : LevelCache.getLevel(i).getRewards()) {
                     if (s.startsWith("GOLD")) {
-                        gold+=Integer.parseInt(s.split("=")[1]);
+                        setGold(gold+=Integer.parseInt(s.split("=")[1]));
                     }
                 }
 
@@ -202,7 +215,7 @@ public class Player {
 
         if (ClanCache.getClan(this) != null) {
             Clan clan = ClanCache.getClan(this);
-            clan.setXp(clan.getXp()+Integer.parseInt(Config.getValue("clanxp-win")));
+            clan.setXp(clan.getXp()+addClanXP);
 
             for (int i = clan.getLevel().getLevel()+1; i < ClanLevelCache.getClanLevels().size(); i++) {
                 if (clan.getXp() >= ClanLevelCache.getLevel(i).getNeededXP()) {
@@ -246,10 +259,10 @@ public class Player {
             return false;
         }
 
-        isBanned = true;
+        setBanned(true);
 
-        bannedTill = time;
-        banReason = reason;
+        setBannedTill(time);
+        setBanReason(reason);
 
         fix();
 
@@ -257,9 +270,9 @@ public class Player {
     }
 
     public void unban() {
-        isBanned = false;
-        bannedTill = null;
-        banReason = null;
+        setBanned(false);
+        setBannedTill(null);
+        setBanReason(null);
         fix();
     }
 
@@ -356,78 +369,7 @@ public class Player {
     }
 
     public static boolean isRegistered(String ID) {
-        return new File("RankedBot/players/" + ID + ".yml").exists();
-    }
-
-    public static void writeFile(String ID, String ign) {
-        try {
-            if (ign != null) {
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/players/" + ID + ".yml"));
-
-                bw.write("name: " + ign + "\n");
-                bw.write("elo: " + Config.getValue("starting-elo") + "\n");
-                bw.write("peak-elo: " + Config.getValue("starting-elo") + "\n");
-                bw.write("wins: 0\n");
-                bw.write("losses: 0\n");
-                bw.write("win-streak: 0\n");
-                bw.write("loss-streak: 0\n");
-                bw.write("highest-ws: 0\n");
-                bw.write("highest-ls: 0\n");
-                bw.write("mvp: 0\n");
-                bw.write("kills: 0\n");
-                bw.write("deaths: 0\n");
-                bw.write("strikes: 0\n");
-                bw.write("scored: 0\n");
-                bw.write("gold: 0\n");
-                bw.write("level: 0\n");
-                bw.write("xp: 0\n");
-                bw.write("theme: default\n");
-                bw.write("owned-themes: default\n");
-                bw.write("is-banned: false\n");
-                bw.write("banned-till:\n");
-                bw.close();
-            }
-            else {
-                Player player = PlayerCache.getPlayer(ID);
-
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/players/" + ID + ".yml"));
-
-                bw.write("name: " + player.getIgn() + "\n");
-                bw.write("elo: " + player.getElo() + "\n");
-                bw.write("peak-elo: " + player.getPeakElo() + "\n");
-                bw.write("wins: " + player.getWins() + "\n");
-                bw.write("losses: " + player.getLosses() + "\n");
-                bw.write("win-streak: " + player.getWinStreak() + "\n");
-                bw.write("loss-streak: " + player.getLossStreak() + "\n");
-                bw.write("highest-ws: " + player.getHighestWS() + "\n");
-                bw.write("highest-ls: " + player.getHighestLS() + "\n");
-                bw.write("mvp: " + player.getMvp() + "\n");
-                bw.write("kills: " + player.getKills() + "\n");
-                bw.write("deaths: " + player.getDeaths() + "\n");
-                bw.write("strikes: " + player.getStrikes() + "\n");
-                bw.write("scored: " + player.getScored() + "\n");
-                bw.write("gold: " + player.getGold() + "\n");
-                bw.write("level: " + player.getLevel().getLevel() + "\n");
-                bw.write("xp: " + player.getXp() + "\n");
-                bw.write("theme: " + player.getTheme().getName() + "\n");
-
-                StringBuilder themes = new StringBuilder();
-                for (Theme t : player.getOwnedThemes()) {
-                    themes.append(t.getName());
-                    if (player.getOwnedThemes().indexOf(t) != player.getOwnedThemes().size() - 1) {
-                        themes.append(",");
-                    }
-                }
-
-                bw.write("owned-themes: " + themes + "\n");
-                bw.write("is-banned: " + player.isBanned + "\n");
-                bw.write("banned-till: " + player.getBannedTill() + "\n");
-                bw.close();
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return SQLPlayerManager.isRegistered(ID);
     }
 
     public String getID() {
@@ -444,6 +386,7 @@ public class Player {
 
     public void setIgn(String ign) {
         this.ign = ign;
+        SQLPlayerManager.updateIgn(ID);
     }
 
     public int getElo() {
@@ -452,6 +395,12 @@ public class Player {
 
     public void setElo(int elo) {
         this.elo = elo;
+
+        if (peakElo < elo) {
+            setPeakElo(elo);
+        }
+
+        SQLPlayerManager.updateElo(ID);
     }
 
     public int getPeakElo() {
@@ -460,6 +409,7 @@ public class Player {
 
     public void setPeakElo(int peakElo) {
         this.peakElo = peakElo;
+        SQLPlayerManager.updatePeakElo(ID);
     }
 
     public int getWins() {
@@ -468,6 +418,7 @@ public class Player {
 
     public void setWins(int wins) {
         this.wins = wins;
+        SQLPlayerManager.updateWins(ID);
     }
 
     public int getLosses() {
@@ -476,6 +427,7 @@ public class Player {
 
     public void setLosses(int losses) {
         this.losses = losses;
+        SQLPlayerManager.updateLosses(ID);
     }
 
     public int getWinStreak() {
@@ -484,6 +436,7 @@ public class Player {
 
     public void setWinStreak(int winStreak) {
         this.winStreak = winStreak;
+        SQLPlayerManager.updateWinStreak(ID);
     }
 
     public int getLossStreak() {
@@ -492,6 +445,7 @@ public class Player {
 
     public void setLossStreak(int lossStreak) {
         this.lossStreak = lossStreak;
+        SQLPlayerManager.updateLossStreak(ID);
     }
 
     public int getHighestWS() {
@@ -500,6 +454,7 @@ public class Player {
 
     public void setHighestWS(int highestWS) {
         this.highestWS = highestWS;
+        SQLPlayerManager.updateHighestWS(ID);
     }
 
     public int getHighestLS() {
@@ -508,6 +463,7 @@ public class Player {
 
     public void setHighestLS(int highestLS) {
         this.highestLS = highestLS;
+        SQLPlayerManager.updateHighestLS(ID);
     }
 
     public int getMvp() {
@@ -516,6 +472,7 @@ public class Player {
 
     public void setMvp(int mvp) {
         this.mvp = mvp;
+        SQLPlayerManager.updateMvp(ID);
     }
 
     public int getStrikes() {
@@ -524,6 +481,7 @@ public class Player {
 
     public void setStrikes(int strikes) {
         this.strikes = strikes;
+        SQLPlayerManager.updateStrikes(ID);
     }
 
     public int getScored() {
@@ -532,6 +490,7 @@ public class Player {
 
     public void setScored(int scored) {
         this.scored = scored;
+        SQLPlayerManager.updateScored(ID);
     }
 
     public int getKills() {
@@ -540,6 +499,7 @@ public class Player {
 
     public void setKills(int kills) {
         this.kills = kills;
+        SQLPlayerManager.updateKills(ID);
     }
 
     public int getDeaths() {
@@ -548,6 +508,7 @@ public class Player {
 
     public void setDeaths(int deaths) {
         this.deaths = deaths;
+        SQLPlayerManager.updateDeaths(ID);
     }
 
     public int getGold() {
@@ -556,6 +517,7 @@ public class Player {
 
     public void setGold(int gold) {
         this.gold = gold;
+        SQLPlayerManager.updateGold(ID);
     }
 
     public Level getLevel() {
@@ -564,6 +526,7 @@ public class Player {
 
     public void setLevel(Level level) {
         this.level = level;
+        SQLPlayerManager.updateLevel(ID);
     }
 
     public int getXp() {
@@ -572,6 +535,7 @@ public class Player {
 
     public void setXp(int xp) {
         this.xp = xp;
+        SQLPlayerManager.updateXP(ID);
     }
 
     public Theme getTheme() {
@@ -580,14 +544,21 @@ public class Player {
 
     public void setTheme(Theme theme) {
         this.theme = theme;
+        SQLPlayerManager.updateTheme(ID);
     }
 
     public ArrayList<Theme> getOwnedThemes() {
         return ownedThemes;
     }
 
-    public void setOwnedThemes(ArrayList<Theme> ownedThemes) {
-        this.ownedThemes = ownedThemes;
+    public void giveTheme(Theme theme) {
+        ownedThemes.add(theme);
+        SQLPlayerManager.updateOwnedThemes(ID);
+    }
+
+    public void removeTheme(Theme theme) {
+        ownedThemes.remove(theme);
+        SQLPlayerManager.updateOwnedThemes(ID);
     }
 
     public boolean isBanned() {
@@ -596,6 +567,7 @@ public class Player {
 
     public void setBanned(boolean banned) {
         isBanned = banned;
+        SQLPlayerManager.updateIsBanned(ID);
     }
 
     public LocalDateTime getBannedTill() {
@@ -604,6 +576,7 @@ public class Player {
 
     public void setBannedTill(LocalDateTime bannedTill) {
         this.bannedTill = bannedTill;
+        SQLPlayerManager.updateBannedTill(ID);
     }
 
     public String getBanReason() {
@@ -612,5 +585,6 @@ public class Player {
 
     public void setBanReason(String banReason) {
         this.banReason = banReason;
+        SQLPlayerManager.updateBanReason(ID);
     }
 }

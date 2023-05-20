@@ -10,7 +10,7 @@ import com.kasp.rankedbot.instance.Queue;
 import com.kasp.rankedbot.instance.cache.GameCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.cache.QueueCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -30,7 +30,7 @@ public class InfoCmd extends Command {
             return;
         }
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `kasp#0675`", 1);
+        Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `kasp#0675`\nhttps://discord.gg/5DdEvfRwz2", 1);
         embed.addField("Players", "`" + PlayerCache.getPlayers().size() + "` registered | `" + guild.getMemberCount() + "` total", false);
         int qing = 0;
         for (Queue q : QueueCache.getQueues().values()) {

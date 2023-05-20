@@ -11,7 +11,13 @@ public class ClanCache {
     private static Map<String, Clan> clans = new HashMap<>();
 
     public static Clan getClan(String name) {
-        return clans.get(name);
+        for (Clan c : clans.values()) {
+            if (c.getName().equalsIgnoreCase(name)) {
+                return c;
+            }
+        }
+
+        return null;
     }
 
     public static Clan getClan(Player player) {

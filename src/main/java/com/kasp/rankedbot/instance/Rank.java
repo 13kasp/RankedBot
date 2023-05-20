@@ -1,12 +1,10 @@
 package com.kasp.rankedbot.instance;
 
+import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.RankCache;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Rank {
 
@@ -20,44 +18,25 @@ public class Rank {
     public Rank(String ID) {
         this.ID = ID;
 
-        Yaml yaml = new Yaml();
-        try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/ranks/" + ID + ".yml"));
+        ResultSet resultSet = SQLite.queryData("SELECT * FROM ranks WHERE discordID='" + ID + "';");
 
-            this.startingElo = Integer.parseInt(data.get("starting-elo").toString());
-            this.endingElo = Integer.parseInt(data.get("ending-elo").toString());
-            this.winElo = Integer.parseInt(data.get("win-elo").toString());
-            this.loseElo = Integer.parseInt(data.get("lose-elo").toString());
-            this.mvpElo = Integer.parseInt(data.get("mvp-elo").toString());
-        } catch (FileNotFoundException e) {
+        try {
+            this.startingElo = resultSet.getInt(3);
+            this.endingElo = resultSet.getInt(4);
+            this.winElo = resultSet.getInt(5);
+            this.loseElo = resultSet.getInt(6);
+            this.mvpElo = resultSet.getInt(7);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
         RankCache.initializeRank(ID, this);
     }
 
-    public static void createFile(String ID, String startingElo, String endingElo, String winElo, String loseElo, String mvpElo) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/ranks/" + ID + ".yml"));
-            bw.write("starting-elo: " + startingElo + "\n");
-            bw.write("ending-elo: " + endingElo + "\n");
-            bw.write("win-elo: " + winElo + "\n");
-            bw.write("lose-elo: " + loseElo + "\n");
-            bw.write("mvp-elo: " + mvpElo + "\n");
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deleteFile(String ID) {
+    public static void delete(String ID) {
         RankCache.removeRank(RankCache.getRank(ID));
 
-        try {
-            Files.deleteIfExists(Path.of("RankedBot/ranks/" + ID + ".yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SQLite.updateData("DELETE FROM ranks WHERE discordID='" + ID + "';");
     }
 
     public String getID() {

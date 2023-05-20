@@ -1,12 +1,10 @@
 package com.kasp.rankedbot.instance;
 
+import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.MapCache;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class GameMap {
 
@@ -18,40 +16,23 @@ public class GameMap {
     public GameMap(String name) {
         this.name = name;
 
-        Yaml yaml = new Yaml();
-        try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/maps/" + name + ".yml"));
+        ResultSet resultSet = SQLite.queryData("SELECT * FROM maps WHERE name='" + name + "';");
 
-            this.height = Integer.parseInt(data.get("height-limit").toString());
-            this.team1 = data.get("team-1").toString();
-            this.team2 = data.get("team-2").toString();
-        } catch (FileNotFoundException e) {
+        try {
+            this.height = resultSet.getInt(3);
+            this.team1 = resultSet.getString(4);
+            this.team2 = resultSet.getString(5);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
         MapCache.initializeMap(name, this);
     }
 
-    public static void createFile(String name, String height, String team1, String team2) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/maps/" + name + ".yml"));
-            bw.write("height-limit: " + height + "\n");
-            bw.write("team-1: " + team1 + "\n");
-            bw.write("team-2: " + team2 + "\n");
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deleteFile(String name) {
+    public static void delete(String name) {
         MapCache.removeMap(MapCache.getMap(name));
 
-        try {
-            Files.deleteIfExists(Path.of("RankedBot/maps/" + name + ".yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SQLite.updateData("DELETE FROM maps WHERE name='" + name + "';");
     }
 
     public String getName() {

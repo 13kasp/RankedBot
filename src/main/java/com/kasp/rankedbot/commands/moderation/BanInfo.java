@@ -5,7 +5,7 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class BanInfo extends Command {
@@ -44,7 +45,8 @@ public class BanInfo extends Command {
         long diffHours = ChronoUnit.HOURS.between(LocalDateTime.now(), player.getBannedTill());
         long diffMins = ChronoUnit.MINUTES.between(LocalDateTime.now(), player.getBannedTill());
 
-        String desc = "Unbanned On `" + player.getBannedTill().toString() + " GMT`\nTime till unbanned `≈ " + diffDays + "d / " + diffHours + "h / " + diffMins + "m`\n**Reason: **" + player.getBanReason();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String desc = "Unbanned On `" + formatter.format(player.getBannedTill()) + " GMT`\nTime till unbanned `≈ " + diffDays + "d / " + diffHours + "h / " + diffMins + "m`\n**Reason: **" + player.getBanReason();
 
         Embed embed = new Embed(EmbedType.DEFAULT, player.getIgn() + "'s Ban Info", desc, 1);
         msg.replyEmbeds(embed.build()).queue();

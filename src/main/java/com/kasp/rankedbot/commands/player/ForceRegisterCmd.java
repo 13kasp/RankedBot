@@ -3,8 +3,9 @@ package com.kasp.rankedbot.commands.player;
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
+import com.kasp.rankedbot.database.SQLPlayerManager;
 import com.kasp.rankedbot.instance.Player;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -35,8 +36,8 @@ public class ForceRegisterCmd extends Command {
         String ign = args[2];
         ign = ign.replaceAll(" ", "").trim();
 
-        Player.writeFile(ID, ign);
-        Player player = new Player(sender.getId());
+        SQLPlayerManager.createPlayer(ID, ign);
+        Player player = new Player(ID);
         player.fix();
 
         Embed reply = new Embed(EmbedType.SUCCESS, "", "You have registered " + guild.getMemberById(ID).getAsMention() + " as `" + ign + "`", 1);

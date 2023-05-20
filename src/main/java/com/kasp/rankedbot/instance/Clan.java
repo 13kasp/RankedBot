@@ -1,17 +1,20 @@
 package com.kasp.rankedbot.instance;
 
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.database.SQLClanManager;
+import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.ClanLevelCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Clan {
 
@@ -48,7 +51,7 @@ public class Clan {
         this.isPrivate = true;
         this.description = "A newly created clan";
         ClanCache.initializeClan(name, this);
-        writeFile();
+        create();
     }
 
     // LOAD CLAN
@@ -56,29 +59,23 @@ public class Clan {
         invitedPlayers = new ArrayList<>();
         this.name = name;
 
-        Yaml yaml = new Yaml();
-        try {
-            // DATA
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/clans/" + name + "/data.yml"));
+        ResultSet resultSet = SQLite.queryData("SELECT * FROM clans WHERE name='" + name + "';");
 
-            this.leader = PlayerCache.getPlayer(data.get("leader").toString());
+        try {
+            this.leader = PlayerCache.getPlayer(resultSet.getString(3));
             this.members = new ArrayList<>();
-            for (String ID : data.get("members").toString().split(",")) {
+            for (String ID : resultSet.getString(4).split(",")) {
                 members.add(PlayerCache.getPlayer(ID));
             }
-            this.reputation = Integer.parseInt(data.get("reputation").toString());
-            this.xp = Integer.parseInt(data.get("clan-xp").toString());
-            this.level = ClanLevelCache.getLevel(Integer.parseInt(data.get("clan-level").toString()));
-            this.wins = Integer.parseInt(data.get("wins").toString());
-            this.losses = Integer.parseInt(data.get("losses").toString());
-
-            // SETTINGS
-            Map<String, Object> settings = yaml.load(new FileInputStream("RankedBot/clans/" + name + "/settings.yml"));
-
-            this.isPrivate = Boolean.parseBoolean(settings.get("private").toString());
-            this.eloJoinReq = Integer.parseInt(settings.get("elo-join-req").toString());
-            this.description = settings.get("description").toString();
-        } catch (FileNotFoundException e) {
+            this.reputation = resultSet.getInt(5);
+            this.xp = resultSet.getInt(6);
+            this.level = ClanLevelCache.getLevel(resultSet.getInt(7));
+            this.wins = resultSet.getInt(8);
+            this.losses = resultSet.getInt(9);
+            this.isPrivate = Boolean.parseBoolean(resultSet.getString(10));
+            this.eloJoinReq = resultSet.getInt(11);
+            this.description = resultSet.getString(12);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -89,46 +86,23 @@ public class Clan {
         ClanCache.removeClan(name);
 
         try {
+            Files.deleteIfExists(Path.of("RankedBot/clans/" + name + "/theme.png"));
+            Files.deleteIfExists(Path.of("RankedBot/clans/" + name + "/icon.png"));
             Files.deleteIfExists(Path.of("RankedBot/clans/" + name));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void writeFile() {
+    public void create() {
+
         new File("RankedBot/clans/" + name).mkdirs();
 
         if (!new File("RankedBot/clans/" + name + "/data.yml").exists()) {
             description = "A newly created PRBW clan";
         }
 
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/clans/" + name + "/data.yml"));
-            bw.write("leader: " + leader.getID() + "\n");
-            String members = "";
-            for (int i = 0; i < this.members.size(); i++) {
-                members += this.members.get(i).getID();
-                if (i != this.members.size() - 1) {
-                    members += ",";
-                }
-            }
-            bw.write("members: " + members + "\n");
-            bw.write("reputation: " + reputation + "\n");
-            bw.write("clan-xp: 0\n");
-            bw.write("clan-level: 0\n");
-            bw.write("wins: 0\n");
-            bw.write("losses: 0\n");
-            bw.close();
-
-            BufferedWriter bw2 = new BufferedWriter(new FileWriter("RankedBot/clans/" + name + "/settings.yml"));
-            bw2.write("private: " + isPrivate + "\n");
-            bw2.write("elo-join-req: " + eloJoinReq + "\n");
-            bw2.write("# We recommend keeping this below 30 characters\n");
-            bw2.write("description: " + description + "\n");
-            bw2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SQLClanManager.createClan(name, leader.getID());
     }
 
     public static void deleteIcon(String name) {
@@ -197,21 +171,26 @@ public class Clan {
 
     public void setPrivate(boolean aPrivate) {
         isPrivate = aPrivate;
+        SQLClanManager.updatePrivate(name);
     }
 
     public void setEloJoinReq(int eloJoinReq) {
         this.eloJoinReq = eloJoinReq;
+        SQLClanManager.updateEloJoinReq(name);
     }
 
     public void setDescription(String description) {
         this.description = description;
+        SQLClanManager.updateDescription(name);
     }
 
     public void setXp(int xp) {
         this.xp = xp;
+        SQLClanManager.updateXP(name);
     }
 
     public void setLevel(ClanLevel level) {
         this.level = level;
+        SQLClanManager.updateLevel(name);
     }
 }

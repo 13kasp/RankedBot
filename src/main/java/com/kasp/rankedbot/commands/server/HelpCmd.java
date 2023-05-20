@@ -2,10 +2,10 @@ package com.kasp.rankedbot.commands.server;
 
 import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
-import com.kasp.rankedbot.instance.embed.Embed;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.commands.CommandManager;
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -42,7 +42,19 @@ public class HelpCmd extends Command {
         }
 
         if (args.length == 2) {
-            CommandSubsystem subsystem = CommandSubsystem.valueOf(args[1].toUpperCase());
+            CommandSubsystem subsystem;
+
+            try {
+                subsystem = CommandSubsystem.valueOf(args[1].toUpperCase());
+            } catch (Exception e) {
+                String subsystems = "";
+                for (CommandSubsystem s :CommandSubsystem.values()) {
+                    subsystems += "`" + s + "` ";
+                }
+                Embed embed = new Embed(EmbedType.ERROR, "Error", "This subsystem does not exist\nAvailable subsystems: " + subsystems, 1);
+                msg.replyEmbeds(embed.build()).queue();
+                return;
+            }
 
             ArrayList<Command> subsystemCmds = new ArrayList<>();
 

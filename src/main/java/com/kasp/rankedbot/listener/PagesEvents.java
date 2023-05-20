@@ -1,5 +1,6 @@
-package com.kasp.rankedbot.instance.embed;
+package com.kasp.rankedbot.listener;
 
+import com.kasp.rankedbot.instance.Embed;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

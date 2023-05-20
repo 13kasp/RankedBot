@@ -35,7 +35,7 @@ public class Leaderboard {
         return lb;
     }
 
-    public static Map<Clan, Integer> getClansLeaderboard() {
+    public static List<Clan> getClansLeaderboard() {
         Map<Clan, Integer> unsortedMap = new HashMap<>();
 
         for (Clan c : ClanCache.getClans().values()) {
@@ -53,6 +53,12 @@ public class Leaderboard {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
 
-        return sortedMap;
+        List<Clan> lb = new ArrayList<>();
+
+        for (Map.Entry<Clan, Integer> entry : sortedMap.entrySet()) {
+            lb.add(entry.getKey());
+        }
+
+        return lb;
     }
 }

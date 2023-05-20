@@ -7,7 +7,7 @@ import com.kasp.rankedbot.instance.Party;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -44,13 +44,22 @@ public class PartyWarpCmd extends Command {
         }
 
         String warped = "";
-        for (Player p : party.getInvitedPlayers()) {
-            if (guild.getMemberById(p.getID()).getVoiceState() != null) {
-                warped += "<@" + p.getID() + "> ";
+        for (Player p : party.getMembers()) {
+            if (!p.getID().equals(sender.getId())) {
+                try {
+                    guild.moveVoiceMember(guild.getMemberById(p.getID()), sender.getVoiceState().getChannel()).queue();
+                    warped += "<@" + p.getID() + "> ";
+                } catch (Exception ignored) {}
             }
         }
 
-        Embed embed = new Embed(EmbedType.SUCCESS, "", "Warped " + warped + " to your vc", 1);
+        Embed embed;
+        if (warped.equals("")) {
+            embed = new Embed(EmbedType.ERROR, "", Msg.getMsg("couldnt-warp"), 1);
+        }
+        else {
+            embed = new Embed(EmbedType.SUCCESS, "", "Warped " + warped + " to your vc", 1);
+        }
         msg.replyEmbeds(embed.build()).queue();
     }
 }

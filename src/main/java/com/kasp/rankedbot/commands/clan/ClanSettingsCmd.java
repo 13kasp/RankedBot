@@ -8,7 +8,7 @@ import com.kasp.rankedbot.instance.Clan;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -25,8 +25,8 @@ public class ClanSettingsCmd extends Command {
     @Override
     public void execute(String[] args, Guild guild, Member sender, TextChannel channel, Message msg) {
         String[] settings = {"private", "eloreq", "description", "icon", "theme"};
-        String[] settingsvalue = {"true/false", "number", "text", "attached `135x135` image", "attached `960x540` image"};
-        String[] settingsdesc = {"make your clan private - only allow inviteed players to join\nor public - anyone will be able to join your clan",
+        String[] settingsvalue = {"true/false", "number", "text", "attached 135x135 image", "attached 960x540 image"};
+        String[] settingsdesc = {"make your clan private - only allow invited players to join\nor public - anyone will be able to join your clan",
                                 "change the required min. elo to join your clan - only works if your clan is set to public",
                                 "change the description of your clan",
                                 "change the icon of your clan",
@@ -87,7 +87,7 @@ public class ClanSettingsCmd extends Command {
                     return;
                 }
                 clan.setDescription(msg.getContentRaw().replace(args[1], "").replace(args[0], "").trim());
-                value = msg.getContentRaw().replace(args[1], "");
+                value = msg.getContentRaw().replace(args[1], "").replace(args[0], "").trim();
             }
             else if (setting.equals("icon")) {
                 if (clan.getLevel().getLevel() < Integer.parseInt(Config.getValue("allow-setting-icon"))) {
@@ -110,7 +110,7 @@ public class ClanSettingsCmd extends Command {
                     msg.replyEmbeds(reply.build()).queue();
                     return;
                 }
-                if (msg.getAttachments().get(0).getWidth() == 135 && msg.getAttachments().get(0).getHeight() == 135) {
+                if (msg.getAttachments().get(0).getWidth() != 135 || msg.getAttachments().get(0).getHeight() != 135) {
                     Embed reply = new Embed(EmbedType.ERROR, "Error", "You have to attach a `135x135` image as your theme", 1);
                     msg.replyEmbeds(reply.build()).queue();
                     return;
@@ -141,7 +141,7 @@ public class ClanSettingsCmd extends Command {
                     msg.replyEmbeds(reply.build()).queue();
                     return;
                 }
-                if (msg.getAttachments().get(0).getWidth() == 960 && msg.getAttachments().get(0).getHeight() == 540) {
+                if (msg.getAttachments().get(0).getWidth() != 960 || msg.getAttachments().get(0).getHeight() != 540) {
                     Embed reply = new Embed(EmbedType.ERROR, "Error", "You have to attach a `960x540` image as your theme", 1);
                     msg.replyEmbeds(reply.build()).queue();
                     return;

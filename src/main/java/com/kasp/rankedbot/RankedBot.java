@@ -3,12 +3,11 @@ package com.kasp.rankedbot;
 import com.kasp.rankedbot.commands.CommandManager;
 import com.kasp.rankedbot.commands.moderation.UnbanTask;
 import com.kasp.rankedbot.config.Config;
+import com.kasp.rankedbot.database.*;
 import com.kasp.rankedbot.instance.*;
-import com.kasp.rankedbot.instance.cache.ClanCache;
-import com.kasp.rankedbot.instance.cache.GameCache;
-import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.PagesEvents;
 import com.kasp.rankedbot.levelsfile.Levels;
+import com.kasp.rankedbot.listener.PagesEvents;
+import com.kasp.rankedbot.listener.PartyInviteButton;
 import com.kasp.rankedbot.listener.QueueJoin;
 import com.kasp.rankedbot.listener.ServerJoin;
 import com.kasp.rankedbot.messages.Msg;
@@ -20,32 +19,33 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import org.yaml.snakeyaml.Yaml;
 
 import javax.security.auth.login.LoginException;
-import java.io.*;
-import java.util.Map;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class RankedBot {
 
     public static JDA jda;
-    public static ServerStats serverStats;
 
-    public static String version = "1.0.0";
+    public static String version = "1.1.2";
     public static Guild guild;
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
 
-        new File("RankedBot/players").mkdirs();
-        new File("RankedBot/ranks").mkdirs();
-        new File("RankedBot/games").mkdirs();
-        new File("RankedBot/maps").mkdirs();
-        new File("RankedBot/queues").mkdirs();
         new File("RankedBot/fonts").mkdirs();
         new File("RankedBot/themes").mkdirs();
-        new File("RankedBot/clans").mkdirs();
+
+        SQLite.connect();
+        SQLTableManager.createPlayersTable();
+        SQLTableManager.createRanksTable();
+        SQLTableManager.createGamesTable();
+        SQLTableManager.createMapsTable();
+        SQLTableManager.createQueuesTable();
+        SQLTableManager.createClansTable();
 
         Config.loadConfig();
         Perms.loadPerms();
@@ -53,40 +53,23 @@ public class RankedBot {
         Levels.loadLevels();
         Levels.loadClanLevels();
 
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/config.yml"));
-        JDABuilder jdaBuilder = JDABuilder.createDefault(data.get("token").toString());
-        jdaBuilder.setStatus(OnlineStatus.valueOf(data.get("status").toString()));
+        if (Config.getValue("token") == null) {
+            System.out.println("[!] Please set your token in config.yml");
+            return;
+        }
+
+        JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getValue("token"));
+        jdaBuilder.setStatus(OnlineStatus.valueOf(Config.getValue("status").toUpperCase()));
         jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
         jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
         jdaBuilder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         jdaBuilder.enableIntents(GatewayIntent.GUILD_MESSAGES);
-        jdaBuilder.addEventListeners(new CommandManager(), new PagesEvents(), new QueueJoin(), new ServerJoin());
+        jdaBuilder.addEventListeners(new CommandManager(), new PagesEvents(), new QueueJoin(), new ServerJoin(), new PartyInviteButton());
         try {
             jda = jdaBuilder.build();
         } catch (LoginException e) {
             e.printStackTrace();
         }
-
-        if (!new File("RankedBot/serverstats.yml").exists()) {
-            try {
-                BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/serverstats.yml"));
-
-                bw.write("games-played: 0");
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Map<String, Object> serverStatsData = null;
-        try {
-            serverStatsData = yaml.load(new FileInputStream("RankedBot/serverstats.yml"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        ServerStats.setGamesPlayed(Integer.parseInt(serverStatsData.get("games-played").toString()));
 
         System.out.println("\n[!] Finishing up... this might take around 10 seconds\n");
 
@@ -94,23 +77,40 @@ public class RankedBot {
         TimerTask task = new TimerTask () {
             @Override
             public void run () {
+                if (jda.getGuilds().size() == 0) {
+                    System.out.println("[!] Please invite this bot to your server first");
+                    return;
+                }
+
                 guild = jda.getGuilds().get(0);
 
-                if (new File("RankedBot/ranks").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/ranks").listFiles()) {
-                        new Rank(f.getName().replaceAll(".yml", ""));
+                for (int i = 1; i <= SQLUtilsManager.getRankSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM ranks where _ID='" + i +"'");
+                    try {
+                        new Rank(resultSet.getString(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a rank could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                if (new File("RankedBot/maps").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/maps").listFiles()) {
-                        new GameMap(f.getName().replaceAll(".yml", ""));
+                for (int i = 1; i <= SQLUtilsManager.getMapSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT name FROM maps where _ID='" + i +"'");
+                    try {
+                        new GameMap(resultSet.getString(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a map could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                if (new File("RankedBot/queues").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/queues").listFiles()) {
-                        new Queue(f.getName().replaceAll(".yml", ""));
+                for (int i = 1; i <= SQLUtilsManager.getQueueSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM queues where _ID='" + i +"'");
+                    try {
+                        new Queue(resultSet.getString(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a queue could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
@@ -128,64 +128,47 @@ public class RankedBot {
                     new ClanLevel(i);
                 }
 
-                if (new File("RankedBot/players").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/players").listFiles()) {
-                        new Player(f.getName().replaceAll(".yml", ""));
+                for (int i = 1; i <= SQLPlayerManager.getPlayerSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM players where _ID='" + i +"'");
+                    try {
+                        new Player(resultSet.getString(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a player could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                if (new File("RankedBot/games").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/games").listFiles()) {
-                        try {
-                            new Game(Integer.parseInt(f.getName().replaceAll(".yml", "")));
-                        } catch (Exception e) {
-                            System.out.println("Game " + f.getName().replaceAll(".yml", "") + " could not be loaded.");
-                        }
+                for (int i = 1; i <= SQLGameManager.getGameSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT number FROM games where _ID='" + i +"'");
+                    try {
+                        new Game(resultSet.getInt(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a game could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                if (new File("RankedBot/clans").listFiles().length > 0) {
-                    for (File f : new File("RankedBot/clans").listFiles()) {
-                        if (!f.getName().endsWith(".png"))
-                            new Clan(f.getName());
+                for (int i = 1; i <= SQLClanManager.getClanSize(); i++) {
+                    ResultSet resultSet = SQLite.queryData("SELECT name FROM clans where _ID='" + i +"'");
+                    try {
+                        new Clan(resultSet.getString(1));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("[!] a clan could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
                 System.out.println("-------------------------------");
 
                 System.out.println("RankedBot has been successfully enabled!");
-                System.out.println("NOTE: this bot can only be used on 1 server, otherwise it'll break");
-                System.out.println("don't forget to configure config.yml and permissions.yml before using it. You can also edit messages.yml (optional)");
-                System.out.println("WARNING: do not restart / stop this bot without executing the command =savedata to prevent data loss");
-                System.out.println("Player and game data saves automatically every 2 hours");
+                System.out.println("NOTE: this bot can only be in 1 server, otherwise it'll break");
+                System.out.println("don't forget to configure config.yml and permissions.yml before using it\nYou can also edit messages.yml (optional)");
 
                 System.out.println("-------------------------------");
             }
         };
 
         new Timer().schedule(task, 10000);
-
-        TimerTask hourlyTask = new TimerTask () {
-            @Override
-            public void run () {
-                System.out.println("[!] Saving players and games");
-                for (Player p : PlayerCache.getPlayers().values()) {
-                    Player.writeFile(p.getID(), null);
-                }
-                System.out.println("- Players data successfully saved");
-                for (Game g : GameCache.getGames().values()) {
-                        Game.writeFile(g);
-                }
-                ServerStats.save();
-                System.out.println("- Games data successfully saved");
-                for (Clan c : ClanCache.getClans().values()) {
-                    c.writeFile();
-                }
-                System.out.println("- Clans data successfully saved");
-            }
-        };
-
-        new Timer().schedule(hourlyTask, 1000*60*60*2, 1000*60*60*2);
 
         TimerTask unbanTask = new TimerTask () {
             @Override

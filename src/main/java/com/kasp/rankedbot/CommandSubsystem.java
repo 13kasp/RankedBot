@@ -6,8 +6,8 @@ public enum CommandSubsystem {
     PLAYER,
     PARTY,
     GAME,
-    QUEUE,
     UTILITIES,
     MODERATION,
-    CLAN;
+    CLAN,
+    CLANWAR;
 }

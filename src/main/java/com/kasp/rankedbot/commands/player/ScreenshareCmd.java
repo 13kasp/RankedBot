@@ -4,7 +4,7 @@ import com.kasp.rankedbot.CommandSubsystem;
 import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.*;
 

@@ -7,7 +7,7 @@ import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.Theme;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
 import com.kasp.rankedbot.instance.cache.ThemeCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -47,7 +47,7 @@ public class RemoveThemeCmd extends Command {
             return;
         }
 
-        player.getOwnedThemes().remove(theme);
+        player.removeTheme(theme);
 
         Embed embed = new Embed(EmbedType.SUCCESS, "", "You have removed `" + theme.getName() + "` theme from " + guild.getMemberById(ID).getAsMention(), 1);
         msg.replyEmbeds(embed.build()).queue();

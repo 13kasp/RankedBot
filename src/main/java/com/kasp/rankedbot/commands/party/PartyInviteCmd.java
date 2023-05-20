@@ -8,12 +8,16 @@ import com.kasp.rankedbot.instance.Party;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.embed.Embed;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.components.Button;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PartyInviteCmd extends Command {
     public PartyInviteCmd(String command, String usage, String[] aliases, String description, CommandSubsystem subsystem) {
@@ -65,7 +69,10 @@ public class PartyInviteCmd extends Command {
         Embed reply = new Embed(EmbedType.SUCCESS, "", "Player <@" + ID + "> has been invited to your party. They have `" + Config.getValue("invite-expiration") + "` mins to accept the invite", 1);
         msg.replyEmbeds(reply.build()).queue();
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "", "You have been invited to join <@" + sender.getId() + ">'s party\nType `=pjoin " + sender.getId() + "` to join it\nThis invite expires after `" + Config.getValue("invite-expiration") + "` mins", 1);
-        channel.sendMessage("<@" + ID + ">").setEmbeds(embed.build()).queue();
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(Button.primary("rankedbot-pinvitation-" + player.getID() + "=" + invited.getID(), "Accept Invitation"));
+
+        Embed embed = new Embed(EmbedType.DEFAULT, "", "You have been invited to join <@" + sender.getId() + ">'s party\nType `=pjoin " + sender.getId() + "` or click the button below to join it\nThis invite expires after `" + Config.getValue("invite-expiration") + "` mins", 1);
+        channel.sendMessage("<@" + ID + ">").setEmbeds(embed.build()).setActionRow(buttons).queue();
     }
 }

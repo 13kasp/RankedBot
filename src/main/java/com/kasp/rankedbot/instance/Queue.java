@@ -1,14 +1,16 @@
 package com.kasp.rankedbot.instance;
 
 import com.kasp.rankedbot.PickingMode;
+import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.QueueCache;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Queue {
 
@@ -16,21 +18,22 @@ public class Queue {
     private int playersEachTeam;
     private PickingMode pickingMode;
     private boolean casual;
-    List<Player> players;
+    private List<Player> players;
+    private double eloMultiplier;
 
     TimerTask queueTimer;
 
     public Queue(String ID) {
         this.ID = ID;
 
-        Yaml yaml = new Yaml();
-        try {
-            Map<String, Object> data = yaml.load(new FileInputStream("RankedBot/queues/" + ID + ".yml"));
+        ResultSet resultSet = SQLite.queryData("SELECT * FROM queues WHERE discordID='" + ID + "';");
 
-            this.playersEachTeam = Integer.parseInt(data.get("players-each-team").toString());
-            this.pickingMode = PickingMode.valueOf(data.get("picking-mode").toString().toUpperCase());
-            this.casual = Boolean.parseBoolean(data.get("casual").toString());
-        } catch (FileNotFoundException e) {
+        try {
+            this.playersEachTeam = resultSet.getInt(3);
+            this.pickingMode = PickingMode.valueOf(resultSet.getString(4).toUpperCase());
+            this.casual = Boolean.parseBoolean(resultSet.getString(5));
+            this.eloMultiplier = resultSet.getDouble(6);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -43,61 +46,65 @@ public class Queue {
         queueTimer = new TimerTask() {
             @Override
             public void run() {
-                if (players.size() >= playersEachTeam * 2) {
+                try {
+                    if (players.size() >= playersEachTeam * 2) {
 
-                    List<Party> partiesInQ = new ArrayList<>();
-                    List<Player> soloPlayersInQ = new ArrayList<>();
+                        List<Party> partiesInQ = new ArrayList<>();
+                        List<Player> soloPlayersInQ = new ArrayList<>();
 
-                    // CHECK FOR ALL PARTIES AND SOLO PLAYERS
-                    for (Player p : players) {
-                        if (PartyCache.getParty(p) != null) {
-                            if (!partiesInQ.contains(PartyCache.getParty(p))) {
-                                partiesInQ.add(PartyCache.getParty(p));
+                        // CHECK FOR ALL PARTIES AND SOLO PLAYERS
+                        for (Player p : players) {
+                            if (PartyCache.getParty(p) != null) {
+                                if (!partiesInQ.contains(PartyCache.getParty(p))) {
+                                    partiesInQ.add(PartyCache.getParty(p));
+                                }
+                            }
+                            else {
+                                soloPlayersInQ.add(p);
                             }
                         }
-                        else {
-                            soloPlayersInQ.add(p);
-                        }
-                    }
 
-                    List<Party> partiesStillInQ = new ArrayList<>(partiesInQ);
-                    // REMOVE PARTIES IF NOT ALL PARTY PLAYERS IN Q
-                    if (partiesInQ.size() > 0) {
-                        for (Party p : partiesInQ) {
-                            for (Player player : p.getMembers()) {
-                                if (!players.contains(player)) {
-                                    partiesStillInQ.remove(PartyCache.getParty(player));
+                        List<Party> partiesStillInQ = new ArrayList<>(partiesInQ);
+                        // REMOVE PARTIES IF NOT ALL PARTY PLAYERS IN Q
+                        if (partiesInQ.size() > 0) {
+                            for (Party p : partiesInQ) {
+                                for (Player player : p.getMembers()) {
+                                    if (!players.contains(player)) {
+                                        partiesStillInQ.remove(PartyCache.getParty(player));
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // CHECK HOW MANY STILL ABLE TO Q
-                    List<Player> ableToQ = new ArrayList<>(soloPlayersInQ);
-                    for (Party p : partiesStillInQ) {
-                        ableToQ.addAll(p.getMembers());
-                    }
-
-                    if (ableToQ.size() >= getPlayersEachTeam() * 2) {
-                        List<Player> playerList = new ArrayList<>();
-
+                        // CHECK HOW MANY STILL ABLE TO Q
+                        List<Player> ableToQ = new ArrayList<>(soloPlayersInQ);
                         for (Party p : partiesStillInQ) {
-                            if (playerList.size() + p.getMembers().size() <= getPlayersEachTeam() * 2) {
-                                playerList.addAll(p.getMembers());
-                                ableToQ.removeAll(p.getMembers());
+                            ableToQ.addAll(p.getMembers());
+                        }
+
+                        if (ableToQ.size() >= getPlayersEachTeam() * 2) {
+                            List<Player> playerList = new ArrayList<>();
+
+                            for (Party p : partiesStillInQ) {
+                                if (playerList.size() + p.getMembers().size() <= getPlayersEachTeam() * 2) {
+                                    playerList.addAll(p.getMembers());
+                                    ableToQ.removeAll(p.getMembers());
+                                }
+                            }
+
+                            int tempPL = playerList.size();
+                            for (int i = 0; i < getPlayersEachTeam() * 2 - tempPL; i++) {
+                                playerList.add(ableToQ.get(i));
+
+                            }
+
+                            if (playerList.size() == getPlayersEachTeam() * 2) {
+                                new Game(playerList, q).pickTeams();
                             }
                         }
-
-                        int tempPL = playerList.size();
-                        for (int i = 0; i < getPlayersEachTeam() * 2 - tempPL; i++) {
-                            playerList.add(ableToQ.get(i));
-
-                        }
-
-                        if (playerList.size() == getPlayersEachTeam() * 2) {
-                            new Game(playerList, q).pickTeams();
-                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -109,26 +116,10 @@ public class Queue {
         players.add(player);
     }
 
-    public static void createFile(String ID, int playersEachTeam, PickingMode pickingMode, boolean casual) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("RankedBot/queues/" + ID + ".yml"));
-            bw.write("players-each-team: " + playersEachTeam + "\n");
-            bw.write("picking-mode: " + pickingMode + "\n");
-            bw.write("casual: " + casual + "\n");
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deleteFile(String ID) {
+    public static void delete(String ID) {
         QueueCache.removeQueue(QueueCache.getQueue(ID));
 
-        try {
-            Files.deleteIfExists(Path.of("RankedBot/queues/" + ID + ".yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SQLite.updateData("DELETE FROM queues WHERE discordID='" + ID + "';");
     }
 
     public void removePlayer(Player player) {
@@ -148,5 +139,8 @@ public class Queue {
     }
     public List<Player> getPlayers() {
         return players;
+    }
+    public double getEloMultiplier() {
+        return eloMultiplier;
     }
 }
