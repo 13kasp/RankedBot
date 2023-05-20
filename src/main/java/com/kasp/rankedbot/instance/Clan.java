@@ -99,7 +99,7 @@ public class Clan {
         new File("RankedBot/clans/" + name).mkdirs();
 
         if (!new File("RankedBot/clans/" + name + "/data.yml").exists()) {
-            description = "A newly created PRBW clan";
+            description = "A newly created RBW clan";
         }
 
         SQLClanManager.createClan(name, leader.getID());
