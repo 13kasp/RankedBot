@@ -211,33 +211,33 @@ s-text-font: "Minecraft"
 # yes this is a big one, but I really wanted to give u full control
 # over the stats img so u can make whatever you want
 
-ign-size: 36
+ign-size: 40
 ign-color: 255,255,255
 ign-pixels: 30,46
 
-ELO-size: 40
-ELO-color: 255,133,133
-ELO-pixels: 305,45
+ELO-size: 36
+ELO-color: 255,96,109
+ELO-pixels: 131,137
 
-PEAKELO-size: 26
-PEAKELO-color: 255,133,133
-PEAKELO-pixels: 486,28
+PEAKELO-size: 36
+PEAKELO-color: 255,101,124
+PEAKELO-pixels: 191,178
 
-WINS-size: 34
-WINS-color: 255,133,133
-WINS-pixels: 142,243
+WINS-size: 36
+WINS-color: 255,100,121
+WINS-pixels: 776,171
 
 WINSTREAK-size: 34
 WINSTREAK-color: 255,133,133
-WINSTREAK-pixels: 237,381
+WINSTREAK-pixels: 9999,9999
 
 HIGHESTWS-size: 34
 HIGHESTWS-color: 255,133,133
-HIGHESTWS-pixels: 240,416
+HIGHESTWS-pixels: 9999,9999
 
-LOSSES-size: 34
-LOSSES-color: 255,133,133
-LOSSES-pixels: 199,278
+LOSSES-size: 36
+LOSSES-color: 255,104,132
+LOSSES-pixels: 834,208
 
 LOSSSTREAK-size: 30
 LOSSSTREAK-color: 255,255,255
@@ -247,57 +247,57 @@ HIGHESTLS-size: 30
 HIGHESTLS-color: 255,255,255
 HIGHESTLS-pixels: 9999,9999
 
-GAMES-size: 34
-GAMES-color: 255,133,133
-GAMES-pixels: 187,209
+GAMES-size: 36
+GAMES-color: 255,97,107
+GAMES-pixels: 823,134
 
-WLR-size: 34
-WLR-color: 255,133,133
-WLR-pixels: 137,312
+WLR-size: 36
+WLR-color: 255,107,145
+WLR-pixels: 768,243
 
-MVP-size: 34
-MVP-color: 255,133,133
-MVP-pixels: 137,486
+MVP-size: 36
+MVP-color: 255,115,171
+MVP-pixels: 768,316
 
-KILLS-size: 34
-KILLS-color: 255,133,133
-KILLS-pixels: 727,270
+KILLS-size: 36
+KILLS-color: 255,123,198
+KILLS-pixels: 775,399
 
-DEATHS-size: 34
-DEATHS-color: 255,133,133
-DEATHS-pixels: 775,305
+DEATHS-size: 36
+DEATHS-color: 255,126,209
+DEATHS-pixels: 825,435
 
-KDR-size: 34
-KDR-color: 255,133,133
-KDR-pixels: 722,338
+KDR-size: 36
+KDR-color: 255,133,235
+KDR-pixels: 768,508
 
-STRIKES-size: 34
-STRIKES-color: 255,133,133
-STRIKES-pixels: 779,405
+STRIKES-size: 38
+STRIKES-color: 255,129,222
+STRIKES-pixels: 195,447
 
-SCORED-size: 34
-SCORED-color: 255,133,133
-SCORED-pixels: 782,438
+SCORED-size: 38
+SCORED-color: 255,133,236
+SCORED-pixels: 197,487
 
-rbw-rank-size: 26
+rbw-rank-size: 38
 # color - role color
-rbw-rank-pixels: 421,53
+rbw-rank-pixels: 40,288
 
 GOLD-size: 40
 GOLD-color: 247,199,42
-GOLD-pixels: 627,45
+GOLD-pixels: 513,49
 
-LEVEL-size: 36
-LEVEL-color: 86,189,42
-LEVEL-pixels: 800,42
+LEVEL-size: 40
+LEVEL-color: 134,230,99
+LEVEL-pixels: 684,47
 
 XP-size: 24
-XP-color: 153,255,110
-XP-pixels: 870,28
+XP-color: 134,230,99
+XP-pixels: 841,28
 
 needed-xp-size: 24
-needed-xp-color: 53,179,0
-needed-xp-pixels: 870,53
+needed-xp-color: 153,255,110
+needed-xp-pixels: 841,53
 
 # theme name
 theme-size: 30
@@ -310,11 +310,11 @@ banned-size: 30
 banned-color: 255,255,255
 banned-pixels: 9999,9999
 
-clan-size: 34
-clan-color: 255,255,255
-clan-pixels: 9999,9999
+clan-size: 36
+clan-color: 124,125,207
+clan-pixels: 43,408
 
-skin-pixels: 365,100
+skin-pixels: 390,115
 skin-size: 400
 
 #============================== CLAN STATS IMAGE
