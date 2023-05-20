@@ -6,7 +6,7 @@
 
     <groupId>com.kasp.rankedbot</groupId>
     <artifactId>RankedBot</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.2</version>
 
     <build>
         <plugins>
