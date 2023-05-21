@@ -10,6 +10,8 @@ import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.*;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -103,8 +105,8 @@ public class Game {
             this.team2.add(captain2);
 
             try {
-                guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue();
-                guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue();
+                guild.moveVoiceMember(guild.getMemberById(captain1.getID()), vc1).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
+                guild.moveVoiceMember(guild.getMemberById(captain2.getID()), vc2).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
             } catch (Exception ignored) {}
 
             this.remainingPlayers.remove(captain1);
@@ -119,7 +121,7 @@ public class Game {
 
         for (Player p : remainingPlayers) {
             try {
-                guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue();
+                guild.moveVoiceMember(guild.getMemberById(p.getID()), vc1).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
             } catch (Exception ignored) {}
         }
 
@@ -255,7 +257,7 @@ public class Game {
 
         for (Player p : team2) {
             try {
-                guild.moveVoiceMember(guild.getMemberById(p.getID()), guild.getVoiceChannelById(vc2ID)).queue();
+                guild.moveVoiceMember(guild.getMemberById(p.getID()), guild.getVoiceChannelById(vc2ID)).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
             } catch (Exception ignored) {}
         }
         if (casual) {
