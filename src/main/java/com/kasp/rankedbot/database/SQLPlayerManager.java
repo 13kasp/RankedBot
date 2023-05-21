@@ -39,7 +39,7 @@ public class SQLPlayerManager {
     }
 
     public static int getPlayerSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM players");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(discordID) FROM players");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {

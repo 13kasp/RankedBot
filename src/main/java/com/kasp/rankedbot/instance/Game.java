@@ -140,51 +140,46 @@ public class Game {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM games WHERE number=" + number + ";");
 
         try {
-            this.state = GameState.valueOf(resultSet.getString(3).toUpperCase());
-            this.casual = Boolean.parseBoolean(resultSet.getString(4));
-            this.map = MapCache.getMap(resultSet.getString(5));
-            this.channelID = resultSet.getString(6);
-            this.vc1ID = resultSet.getString(7);
-            this.vc2ID = resultSet.getString(8);
-            this.queue = QueueCache.getQueue(resultSet.getString(9));
+            this.state = GameState.valueOf(resultSet.getString(2).toUpperCase());
+            this.casual = Boolean.parseBoolean(resultSet.getString(3));
+            this.map = MapCache.getMap(resultSet.getString(4));
+            this.channelID = resultSet.getString(5);
+            this.vc1ID = resultSet.getString(6);
+            this.vc2ID = resultSet.getString(7);
+            this.queue = QueueCache.getQueue(resultSet.getString(8));
 
-            try {
-                if (state != GameState.STARTING) {
-                    if (state != GameState.SCORED) {
-                        for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
-                            team1.add(PlayerCache.getPlayer(resultSet.getString(10).split(",")[i]));
-                            team2.add(PlayerCache.getPlayer(resultSet.getString(11).split(",")[i]));
-                            players.add(team1.get(i));
-                            players.add(team2.get(i));
-                        }
-                    }
-                    else {
-                        for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
-                            team1.add(PlayerCache.getPlayer(resultSet.getString(10).split(",")[i].split("=")[0]));
-                            eloGain.put(team1.get(i), Integer.parseInt(resultSet.getString(10).split(",")[i].split("=")[1]));
-
-                            team2.add(PlayerCache.getPlayer(resultSet.getString(11).split(",")[i].split("=")[0]));
-                            eloGain.put(team2.get(i), Integer.parseInt(resultSet.getString(11).split(",")[i].split("=")[1]));
-
-                            players.add(team1.get(i));
-                            players.add(team2.get(i));
-                        }
+            if (state != GameState.STARTING) {
+                if (state != GameState.SCORED) {
+                    for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
+                        team1.add(PlayerCache.getPlayer(resultSet.getString(9).split(",")[i]));
+                        team2.add(PlayerCache.getPlayer(resultSet.getString(10).split(",")[i]));
+                        players.add(team1.get(i));
+                        players.add(team2.get(i));
                     }
                 }
+                else {
+                    for (int i = 0; i < queue.getPlayersEachTeam(); i++) {
+                        team1.add(PlayerCache.getPlayer(resultSet.getString(9).split(",")[i].split("=")[0]));
+                        eloGain.put(team1.get(i), Integer.parseInt(resultSet.getString(9).split(",")[i].split("=")[1]));
 
-                if (state == GameState.SCORED) {
-                    if (!(resultSet.getString(12) == null)) {
-                        this.mvp = PlayerCache.getPlayer(resultSet.getString(12));
+                        team2.add(PlayerCache.getPlayer(resultSet.getString(10).split(",")[i].split("=")[0]));
+                        eloGain.put(team2.get(i), Integer.parseInt(resultSet.getString(10).split(",")[i].split("=")[1]));
+
+                        players.add(team1.get(i));
+                        players.add(team2.get(i));
                     }
-                    this.scoredBy = guild.getMemberById(resultSet.getString(13));
                 }
+            }
 
-                if (state == GameState.VOIDED) {
-                    this.scoredBy = guild.getMemberById(resultSet.getString(13));
+            if (state == GameState.SCORED) {
+                if (!(resultSet.getString(11) == null)) {
+                    this.mvp = PlayerCache.getPlayer(resultSet.getString(11));
                 }
-            } catch (Exception e) {
-                System.out.println("Game " + number + " could not be loaded");
-                return;
+                this.scoredBy = guild.getMemberById(resultSet.getString(12));
+            }
+
+            if (state == GameState.VOIDED) {
+                this.scoredBy = guild.getMemberById(resultSet.getString(12));
             }
             
         } catch (SQLException e) {
@@ -449,6 +444,9 @@ public class Game {
             }
 
             p.setElo(p.getElo() - eloGain.get(p));
+            if (p.getElo() < 0) {
+                p.setElo(0);
+            }
 
             p.fix();
         }

@@ -29,10 +29,10 @@ public class Queue {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM queues WHERE discordID='" + ID + "';");
 
         try {
-            this.playersEachTeam = resultSet.getInt(3);
-            this.pickingMode = PickingMode.valueOf(resultSet.getString(4).toUpperCase());
-            this.casual = Boolean.parseBoolean(resultSet.getString(5));
-            this.eloMultiplier = resultSet.getDouble(6);
+            this.playersEachTeam = resultSet.getInt(2);
+            this.pickingMode = PickingMode.valueOf(resultSet.getString(3).toUpperCase());
+            this.casual = Boolean.parseBoolean(resultSet.getString(4));
+            this.eloMultiplier = resultSet.getDouble(5);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -19,9 +19,9 @@ public class GameMap {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM maps WHERE name='" + name + "';");
 
         try {
-            this.height = resultSet.getInt(3);
-            this.team1 = resultSet.getString(4);
-            this.team2 = resultSet.getString(5);
+            this.height = resultSet.getInt(2);
+            this.team1 = resultSet.getString(3);
+            this.team2 = resultSet.getString(4);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

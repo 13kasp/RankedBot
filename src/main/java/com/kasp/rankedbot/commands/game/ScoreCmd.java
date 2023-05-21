@@ -65,7 +65,7 @@ public class ScoreCmd extends Command {
 
         game.scoreGame(winningTeam, losingTeam, PlayerCache.getPlayer(mvpID), sender);
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "Game `#" + game.getNumber() + "` has been scored", "", 1);
+        Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` has been scored", "", 1);
 
         String team1 = "";
         for (Player p : game.getTeam1()) {

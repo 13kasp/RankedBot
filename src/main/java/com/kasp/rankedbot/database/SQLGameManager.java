@@ -44,6 +44,14 @@ public class SQLGameManager {
             }
         }
 
+        ResultSet resultSet = SQLite.queryData("SELECT EXISTS(SELECT 1 FROM games WHERE number='" + g.getNumber() + "');");
+        try {
+            if (resultSet.getInt(1) == 1)
+                SQLite.updateData("DELETE FROM games WHERE number = " + g.getNumber() + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         SQLite.updateData("INSERT INTO games(number, state, casual, map, channelID, vc1ID, vc2ID, queueID, team1, team2)" +
                 " VALUES(" + g.getNumber() + "," +
                 "'" + g.getState().toString().toUpperCase() + "'," +
@@ -58,7 +66,7 @@ public class SQLGameManager {
     }
 
     public static int getGameSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM games");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(number) FROM games");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {

@@ -23,7 +23,7 @@ public class SQLClanManager {
     }
 
     public static int getClanSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM clans");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(name) FROM clans");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {

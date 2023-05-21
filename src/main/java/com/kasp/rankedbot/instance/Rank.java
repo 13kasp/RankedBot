@@ -21,13 +21,13 @@ public class Rank {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM ranks WHERE discordID='" + ID + "';");
 
         try {
-            this.startingElo = resultSet.getInt(3);
-            this.endingElo = resultSet.getInt(4);
-            this.winElo = resultSet.getInt(5);
-            this.loseElo = resultSet.getInt(6);
-            this.mvpElo = resultSet.getInt(7);
+            this.startingElo = resultSet.getInt(2);
+            this.endingElo = resultSet.getInt(3);
+            this.winElo = resultSet.getInt(4);
+            this.loseElo = resultSet.getInt(5);
+            this.mvpElo = resultSet.getInt(6);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         RankCache.initializeRank(ID, this);

@@ -18,7 +18,7 @@ public class SQLUtilsManager {
     }
 
     public static int getRankSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM ranks");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(discordID) FROM ranks");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {
@@ -38,7 +38,7 @@ public class SQLUtilsManager {
     }
 
     public static int getQueueSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM queues");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(discordID) FROM queues");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {
@@ -57,7 +57,7 @@ public class SQLUtilsManager {
     }
 
     public static int getMapSize() {
-        ResultSet resultSet = SQLite.queryData("SELECT COUNT(_ID) FROM maps");
+        ResultSet resultSet = SQLite.queryData("SELECT COUNT(name) FROM maps");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {

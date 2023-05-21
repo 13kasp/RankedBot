@@ -50,6 +50,8 @@ public class UndoGameCmd extends Command {
         Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` has been undone", "You can re-score it by simply using `=score` again", 1);
         msg.replyEmbeds(embed.build()).queue();
 
+        embed.setType(EmbedType.ERROR);
+
         embed.addField("Unscored By", sender.getAsMention(), false);
         embed.setDescription("");
 

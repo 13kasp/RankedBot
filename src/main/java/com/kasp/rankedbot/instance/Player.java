@@ -51,37 +51,37 @@ public class Player {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM players WHERE discordID='" + ID + "';");
 
         try {
-            this.ign = resultSet.getString(3);
-            this.elo = resultSet.getInt(4);
-            this.peakElo = resultSet.getInt(5);
-            this.wins = resultSet.getInt(6);
-            this.losses = resultSet.getInt(7);
-            this.winStreak = resultSet.getInt(8);
-            this.lossStreak = resultSet.getInt(9);
-            this.highestWS = resultSet.getInt(10);
-            this.highestLS = resultSet.getInt(11);
-            this.mvp = resultSet.getInt(12);
-            this.kills = resultSet.getInt(13);
-            this.deaths = resultSet.getInt(14);
-            this.strikes = resultSet.getInt(15);
-            this.scored = resultSet.getInt(16);
-            this.gold = resultSet.getInt(17);
-            this.level = LevelCache.getLevel(resultSet.getInt(18));
-            this.xp = resultSet.getInt(19);
-            this.theme = ThemeCache.getTheme(resultSet.getString(20));
+            this.ign = resultSet.getString(2);
+            this.elo = resultSet.getInt(3);
+            this.peakElo = resultSet.getInt(4);
+            this.wins = resultSet.getInt(5);
+            this.losses = resultSet.getInt(6);
+            this.winStreak = resultSet.getInt(7);
+            this.lossStreak = resultSet.getInt(8);
+            this.highestWS = resultSet.getInt(9);
+            this.highestLS = resultSet.getInt(10);
+            this.mvp = resultSet.getInt(11);
+            this.kills = resultSet.getInt(12);
+            this.deaths = resultSet.getInt(13);
+            this.strikes = resultSet.getInt(14);
+            this.scored = resultSet.getInt(15);
+            this.gold = resultSet.getInt(16);
+            this.level = LevelCache.getLevel(resultSet.getInt(17));
+            this.xp = resultSet.getInt(18);
+            this.theme = ThemeCache.getTheme(resultSet.getString(19));
 
             ownedThemes = new ArrayList<>();
 
-            String[] themes = resultSet.getString(21).split(",");
+            String[] themes = resultSet.getString(20).split(",");
             for (String s : themes) {
                 ownedThemes.add(ThemeCache.getTheme(s));
             }
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            this.isBanned = Boolean.parseBoolean(resultSet.getString(22));
+            this.isBanned = Boolean.parseBoolean(resultSet.getString(21));
             if (isBanned) {
-                this.bannedTill = LocalDateTime.parse(resultSet.getString(23), formatter);
-                this.banReason = resultSet.getString(24);
+                this.bannedTill = LocalDateTime.parse(resultSet.getString(22), formatter);
+                this.banReason = resultSet.getString(23);
             }
         } catch (SQLException e) {
             e.printStackTrace();

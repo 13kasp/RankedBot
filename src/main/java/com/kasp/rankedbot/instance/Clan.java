@@ -62,19 +62,19 @@ public class Clan {
         ResultSet resultSet = SQLite.queryData("SELECT * FROM clans WHERE name='" + name + "';");
 
         try {
-            this.leader = PlayerCache.getPlayer(resultSet.getString(3));
+            this.leader = PlayerCache.getPlayer(resultSet.getString(2));
             this.members = new ArrayList<>();
-            for (String ID : resultSet.getString(4).split(",")) {
+            for (String ID : resultSet.getString(3).split(",")) {
                 members.add(PlayerCache.getPlayer(ID));
             }
-            this.reputation = resultSet.getInt(5);
-            this.xp = resultSet.getInt(6);
-            this.level = ClanLevelCache.getLevel(resultSet.getInt(7));
-            this.wins = resultSet.getInt(8);
-            this.losses = resultSet.getInt(9);
-            this.isPrivate = Boolean.parseBoolean(resultSet.getString(10));
-            this.eloJoinReq = resultSet.getInt(11);
-            this.description = resultSet.getString(12);
+            this.reputation = resultSet.getInt(4);
+            this.xp = resultSet.getInt(5);
+            this.level = ClanLevelCache.getLevel(resultSet.getInt(6));
+            this.wins = resultSet.getInt(7);
+            this.losses = resultSet.getInt(8);
+            this.isPrivate = Boolean.parseBoolean(resultSet.getString(9));
+            this.eloJoinReq = resultSet.getInt(10);
+            this.description = resultSet.getString(11);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

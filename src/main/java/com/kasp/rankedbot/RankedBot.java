@@ -23,7 +23,8 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,7 +32,7 @@ public class RankedBot {
 
     public static JDA jda;
 
-    public static String version = "1.1.2";
+    public static String version = "1.1.3";
     public static Guild guild;
 
     public static void main(String[] args) {
@@ -84,35 +85,9 @@ public class RankedBot {
 
                 guild = jda.getGuilds().get(0);
 
-                for (int i = 1; i <= SQLUtilsManager.getRankSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM ranks where _ID='" + i +"'");
-                    try {
-                        new Rank(resultSet.getString(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.out.println("[!] a rank could not be loaded! Please make a bug report on support discord asap");
-                    }
-                }
-
-                for (int i = 1; i <= SQLUtilsManager.getMapSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT name FROM maps where _ID='" + i +"'");
-                    try {
-                        new GameMap(resultSet.getString(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.out.println("[!] a map could not be loaded! Please make a bug report on support discord asap");
-                    }
-                }
-
-                for (int i = 1; i <= SQLUtilsManager.getQueueSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM queues where _ID='" + i +"'");
-                    try {
-                        new Queue(resultSet.getString(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.out.println("[!] a queue could not be loaded! Please make a bug report on support discord asap");
-                    }
-                }
+                // =============
+                // LOAD ALL THEMES AND LEVELS
+                // =============
 
                 if (new File("RankedBot/themes").listFiles().length > 0) {
                     for (File f : new File("RankedBot/themes").listFiles()) {
@@ -128,32 +103,96 @@ public class RankedBot {
                     new ClanLevel(i);
                 }
 
-                for (int i = 1; i <= SQLPlayerManager.getPlayerSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT discordID FROM players where _ID='" + i +"'");
+                // =============
+                // LOAD ALL DATA FROM DB
+                // =============
+
+                List<String> ranks = new ArrayList<>();
+                List<String> maps = new ArrayList<>();
+                List<String> queues = new ArrayList<>();
+                List<String> players = new ArrayList<>();
+                List<String> games = new ArrayList<>();
+                List<String> clans = new ArrayList<>();
+
+                try {
+                    ResultSet rs = SQLite.queryData("SELECT * FROM ranks");
+                    while (rs.next()) {
+                        ranks.add(rs.getString(1));
+                    }
+
+                    rs = SQLite.queryData("SELECT * FROM maps");
+                    while (rs.next()) {
+                        maps.add(rs.getString(1));
+                    }
+
+                    rs = SQLite.queryData("SELECT * FROM queues");
+                    while (rs.next()) {
+                        queues.add(rs.getString(1));
+                    }
+
+                    rs = SQLite.queryData("SELECT * FROM players");
+                    while (rs.next()) {
+                        players.add(rs.getString(1));
+                    }
+
+                    rs = SQLite.queryData("SELECT * FROM games");
+                    while (rs.next()) {
+                        games.add(rs.getString(1));
+                    }
+
+                    rs = SQLite.queryData("SELECT * FROM clans");
+                    while (rs.next()) {
+                        clans.add(rs.getString(1));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("[!] There was a problem loading all data. Please make a bug report on support discord asap");
+                }
+
+                for (String s : ranks) {
                     try {
-                        new Player(resultSet.getString(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.out.println("[!] a player could not be loaded! Please make a bug report on support discord asap");
+                        new Rank(s);
+                    } catch (Exception e) {
+                        System.out.println("[!] a rank could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                for (int i = 1; i <= SQLGameManager.getGameSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT number FROM games where _ID='" + i +"'");
+                for (String s : maps) {
                     try {
-                        new Game(resultSet.getInt(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                        new GameMap(s);
+                    } catch (Exception e) {
+                        System.out.println("[!] a map could not be loaded! Please make a bug report on support discord asap");
+                    }
+                }
+
+                for (String s : queues) {
+                    try {
+                        new Queue(s);
+                    } catch (Exception e) {
+                        System.out.println("[!] a queue could not be loaded! Please make a bug report on support discord asap");
+                    }
+                }
+
+                for (String s : players) {
+                    try {
+                        new Player(s);
+                    } catch (Exception e) {
+                        System.out.println("[!] a queue could not be loaded! Please make a bug report on support discord asap");
+                    }
+                }
+
+                for (String s : games) {
+                    try {
+                        new Game(Integer.parseInt(s));
+                    } catch (Exception e) {
                         System.out.println("[!] a game could not be loaded! Please make a bug report on support discord asap");
                     }
                 }
 
-                for (int i = 1; i <= SQLClanManager.getClanSize(); i++) {
-                    ResultSet resultSet = SQLite.queryData("SELECT name FROM clans where _ID='" + i +"'");
+                for (String s : clans) {
                     try {
-                        new Clan(resultSet.getString(1));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                        new Clan(s);
+                    } catch (Exception e) {
                         System.out.println("[!] a clan could not be loaded! Please make a bug report on support discord asap");
                     }
                 }

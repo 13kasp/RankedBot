@@ -22,15 +22,7 @@ public class DeleteQueueCmd extends Command {
             return;
         }
 
-        VoiceChannel vc = null;
         String ID = args[1].replaceAll("[^0-9]","");
-        try {vc = guild.getVoiceChannelById(ID);}catch (Exception ignored){}
-
-        if (vc == null) {
-            Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("invalid-vc"), 1);
-            msg.replyEmbeds(reply.build()).queue();
-            return;
-        }
 
         if (!QueueCache.containsQueue(ID)) {
             Embed reply = new Embed(EmbedType.ERROR, "Error", Msg.getMsg("q-doesnt-exist"), 1);

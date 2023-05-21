@@ -4,7 +4,6 @@ public class SQLTableManager {
 
     public static void createPlayersTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS players(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "discordID TEXT," +
                 "ign TEXT," +
                 "elo INTEGER," +
@@ -32,7 +31,6 @@ public class SQLTableManager {
 
     public static void createClansTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS clans(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "name TEXT," +
                 "leader TEXT," +
                 "members TEXT," +
@@ -48,7 +46,6 @@ public class SQLTableManager {
 
     public static void createGamesTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS games(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "number INTEGER," +
                 "state TEXT," +
                 "casual TEXT," +
@@ -65,7 +62,6 @@ public class SQLTableManager {
 
     public static void createMapsTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS maps(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "name TEXT," +
                 "heightLimit INTEGER," +
                 "team1 TEXT," +
@@ -74,7 +70,6 @@ public class SQLTableManager {
 
     public static void createQueuesTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS queues(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "discordID TEXT," +
                 "playersEachTeam INTEGER," +
                 "pickingMode TEXT," +
@@ -84,7 +79,6 @@ public class SQLTableManager {
 
     public static void createRanksTable() {
         SQLite.updateData("CREATE TABLE IF NOT EXISTS ranks(" +
-                "_ID INTEGER PRIMARY KEY," +
                 "discordID TEXT," +
                 "startingElo INTEGER," +
                 "endingElo INTEGER," +
