@@ -109,7 +109,7 @@ public class Queue {
             }
         };
 
-        new Timer().schedule(queueTimer, 0L, 3000L);
+        new Timer().schedule(queueTimer, 0L, 7000L);
     }
 
     public void addPlayer(Player player) {

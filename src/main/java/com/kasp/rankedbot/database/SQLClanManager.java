@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class SQLClanManager {
 
     public static void createClan(String name, String leader) {
-        SQLite.updateData("INSERT INTO clans(name, leader, members, reputation, xp, level, wins, losses, private, eloJoinReq, description)" +
+        SQLite.updateData("INSERT INTO clans(name, leader, members, reputation, clanXP, clanLevel, wins, losses, private, eloJoinReq, description)" +
                 " VALUES('" + name + "'," +
                 "'" + leader + "'," +
                 "'" + leader + "'," +
@@ -17,9 +17,9 @@ public class SQLClanManager {
                 0 + "," +
                 0 + "," +
                 0 + "," +
-                "'" + true + "'," +
+                "'true'," +
                 0 + "," +
-                "'A newly created clan');");
+                "'A newly created RBW clan');");
     }
 
     public static int getClanSize() {
