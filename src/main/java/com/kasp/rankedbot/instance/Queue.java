@@ -7,10 +7,7 @@ import com.kasp.rankedbot.instance.cache.QueueCache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Queue {
 
@@ -100,6 +97,9 @@ public class Queue {
 
                             if (playerList.size() == getPlayersEachTeam() * 2) {
                                 new Game(playerList, q).pickTeams();
+                                for (Player p : playerList) {
+                                    players.remove(p);
+                                }
                             }
                         }
                     }
