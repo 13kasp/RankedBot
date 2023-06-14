@@ -92,7 +92,6 @@ public class Queue {
                             int tempPL = playerList.size();
                             for (int i = 0; i < getPlayersEachTeam() * 2 - tempPL; i++) {
                                 playerList.add(ableToQ.get(i));
-
                             }
 
                             if (playerList.size() == getPlayersEachTeam() * 2) {
