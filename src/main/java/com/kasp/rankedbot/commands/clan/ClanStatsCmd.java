@@ -5,18 +5,18 @@ import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.commands.Command;
 import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.instance.Clan;
+import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.instance.Leaderboard;
 import com.kasp.rankedbot.instance.Player;
 import com.kasp.rankedbot.instance.cache.ClanCache;
 import com.kasp.rankedbot.instance.cache.PlayerCache;
-import com.kasp.rankedbot.instance.Embed;
 import com.kasp.rankedbot.messages.Msg;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -24,7 +24,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,18 +69,19 @@ public class ClanStatsCmd extends Command {
         Player clanLeader = clan.getLeader();
 
         if (new File("RankedBot/clans/theme.png").exists()) {
-            Document document = null;
+            String uuid = null;
             try {
-                document = Jsoup.connect("https://api.mineatar.io/uuid/" + clanLeader.getIgn()).get();
-            } catch (IOException ignored) {}
+                uuid = new JSONObject(IOUtils.toString(URI.create("https://api.mojang.com/users/profiles/minecraft/" + clanLeader.getIgn()), StandardCharsets.UTF_8)).getString("id");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             String skinlink;
-            if (document != null) {
-                String UUID = document.body().text();
-                skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("leaderskin-size") + "/" + UUID;
+            if (uuid != null) {
+                skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/" + uuid;
             }
             else {
-                skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("leaderskin-size") + "/069a79f4-44e9-4726-a5be-fca90e38aaf5";
+                skinlink = "https://visage.surgeplay.com/full/" + Config.getValue("skin-size") + "/75a0352f17b64119a041d0be09701235";
             }
 
             try {

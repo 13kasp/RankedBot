@@ -217,15 +217,15 @@ ign-pixels: 30,46
 
 ELO-size: 36
 ELO-color: 255,96,109
-ELO-pixels: 131,137
+ELO-pixels: 131,139
 
 PEAKELO-size: 36
 PEAKELO-color: 255,101,124
-PEAKELO-pixels: 191,178
+PEAKELO-pixels: 191,180
 
-WINS-size: 36
+WINS-size: 34
 WINS-color: 255,100,121
-WINS-pixels: 776,171
+WINS-pixels: 776,173
 
 WINSTREAK-size: 34
 WINSTREAK-color: 255,133,133
@@ -235,9 +235,9 @@ HIGHESTWS-size: 34
 HIGHESTWS-color: 255,133,133
 HIGHESTWS-pixels: 9999,9999
 
-LOSSES-size: 36
+LOSSES-size: 34
 LOSSES-color: 255,104,132
-LOSSES-pixels: 834,208
+LOSSES-pixels: 834,210
 
 LOSSSTREAK-size: 30
 LOSSSTREAK-color: 255,255,255
@@ -247,41 +247,41 @@ HIGHESTLS-size: 30
 HIGHESTLS-color: 255,255,255
 HIGHESTLS-pixels: 9999,9999
 
-GAMES-size: 36
+GAMES-size: 34
 GAMES-color: 255,97,107
-GAMES-pixels: 823,134
+GAMES-pixels: 823,136
 
-WLR-size: 36
+WLR-size: 34
 WLR-color: 255,107,145
-WLR-pixels: 768,243
+WLR-pixels: 768,245
 
-MVP-size: 36
+MVP-size: 34
 MVP-color: 255,115,171
-MVP-pixels: 768,316
+MVP-pixels: 768,318
 
-KILLS-size: 36
+KILLS-size: 34
 KILLS-color: 255,123,198
-KILLS-pixels: 775,399
+KILLS-pixels: 775,401
 
-DEATHS-size: 36
+DEATHS-size: 34
 DEATHS-color: 255,126,209
-DEATHS-pixels: 825,435
+DEATHS-pixels: 825,437
 
-KDR-size: 36
+KDR-size: 34
 KDR-color: 255,133,235
-KDR-pixels: 768,508
+KDR-pixels: 768,510
 
-STRIKES-size: 38
+STRIKES-size: 36
 STRIKES-color: 255,129,222
-STRIKES-pixels: 195,447
+STRIKES-pixels: 195,449
 
-SCORED-size: 38
+SCORED-size: 36
 SCORED-color: 255,133,236
-SCORED-pixels: 197,487
+SCORED-pixels: 197,489
 
-rbw-rank-size: 38
+rbw-rank-size: 36
 # color - role color
-rbw-rank-pixels: 40,288
+rbw-rank-pixels: 40,290
 
 GOLD-size: 40
 GOLD-color: 247,199,42
