@@ -63,7 +63,7 @@ public class SubmitCmd extends Command {
             queues += "<#" + q.getID() + ">\n";
         }
         embed.addField("Requeue here:", queues, false);
-        embed.setFooter("RankedBot by kasp#0675");
+        embed.setFooter("RankedBot by kasp1337");
         channel.sendMessageEmbeds(embed.build()).queue();
 
         game.setState(GameState.SUBMITTED);

@@ -77,9 +77,7 @@ public class StatsCmd extends Command {
                 String uuid = null;
                 try {
                     uuid = new JSONObject(IOUtils.toString(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player.getIgn()), StandardCharsets.UTF_8)).getString("id");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (Exception ignored) {}
 
                 String skinlink;
                 if (uuid != null) {

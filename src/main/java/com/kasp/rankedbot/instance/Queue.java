@@ -1,13 +1,19 @@
 package com.kasp.rankedbot.instance;
 
+import com.kasp.rankedbot.EmbedType;
 import com.kasp.rankedbot.PickingMode;
+import com.kasp.rankedbot.RankedBot;
+import com.kasp.rankedbot.config.Config;
 import com.kasp.rankedbot.database.SQLite;
 import com.kasp.rankedbot.instance.cache.PartyCache;
 import com.kasp.rankedbot.instance.cache.QueueCache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Queue {
 
@@ -95,9 +101,29 @@ public class Queue {
                             }
 
                             if (playerList.size() == getPlayersEachTeam() * 2) {
-                                new Game(playerList, q).pickTeams();
-                                for (Player p : playerList) {
-                                    players.remove(p);
+                                int channelCount;
+
+                                try {
+                                    channelCount = RankedBot.guild.getCategoryById(Config.getValue("game-vcs-category")).getChannels().size();
+                                } catch (Exception e) {
+                                    channelCount = 0;
+                                }
+
+                                if (channelCount < 49) {
+                                    new Game(playerList, q).pickTeams();
+                                    for (Player p : playerList) {
+                                        players.remove(p);
+                                    }
+                                }
+                                else {
+                                    String mentions = "";
+                                    for (Player p : playerList) {
+                                        mentions+="<@" + p.getID() + ">";
+                                    }
+
+                                    Embed embed = new Embed(EmbedType.ERROR, "Too Many Games", "There's already 50 game vcs (max channels for discord category) so I cannot make any more\n" +
+                                            "Please wait a little or void the on-going games", 1);
+                                    RankedBot.guild.getTextChannelById(Config.getValue("alerts-channel")).sendMessage(mentions).setEmbeds(embed.build()).queue();
                                 }
                             }
                         }
