@@ -63,7 +63,10 @@ public class ScoreCmd extends Command {
             losingTeam = game.getTeam1();
         }
 
-        game.scoreGame(winningTeam, losingTeam, PlayerCache.getPlayer(mvpID), sender);
+        if (args[3].equalsIgnoreCase("none"))
+            game.scoreGame(winningTeam, losingTeam, null, sender);
+        else
+            game.scoreGame(winningTeam, losingTeam, PlayerCache.getPlayer(mvpID), sender);
 
         Embed embed = new Embed(EmbedType.SUCCESS, "Game `#" + game.getNumber() + "` has been scored", "", 1);
 

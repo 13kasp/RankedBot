@@ -188,9 +188,9 @@ public class Game {
     }
 
     public void pickTeams() {
-        if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
-            playersInParties = new HashMap<>();
+        playersInParties = new HashMap<>();
 
+        if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
             if (PartyCache.getParty(captain1) != null) {
                 playersInParties.put(captain1, PartyCache.getParty(captain1).getMembers().size());
             }

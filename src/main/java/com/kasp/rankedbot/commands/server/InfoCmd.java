@@ -30,7 +30,7 @@ public class InfoCmd extends Command {
             return;
         }
 
-        Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `kasp#0675`\nhttps://discord.gg/5DdEvfRwz2", 1);
+        Embed embed = new Embed(EmbedType.DEFAULT, "Server Info", "Ranked Bot v" + RankedBot.version + " by `13kasp`\nget free: https://discord.gg/5DdEvfRwz2", 1);
         embed.addField("Players", "`" + PlayerCache.getPlayers().size() + "` registered | `" + guild.getMemberCount() + "` total", false);
         int qing = 0;
         for (Queue q : QueueCache.getQueues().values()) {
