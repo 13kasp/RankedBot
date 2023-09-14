@@ -32,7 +32,7 @@ public class RankedBot {
 
     public static JDA jda;
 
-    public static String version = "1.1.5";
+    public static String version = "1.1.7";
     public static Guild guild;
 
     public static void main(String[] args) {

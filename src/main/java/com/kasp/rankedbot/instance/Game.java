@@ -74,9 +74,17 @@ public class Game {
 
         this.casual = queue.isCasual();
 
+        //
+        // PICK THE MAP RANDOMLY
+        //
+
         List<GameMap> maps = new ArrayList<>(MapCache.getMaps().values());
         Collections.shuffle(maps);
         this.map = maps.get(0);
+
+        //
+        // CREATE CHANNELS
+        //
 
         this.channelsCategory = guild.getCategoryById(Config.getValue("game-channels-category"));
         this.vcsCategory = guild.getCategoryById(Config.getValue("game-vcs-category"));
@@ -84,6 +92,10 @@ public class Game {
         channelID = channelsCategory.createTextChannel(Config.getValue("game-channel-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" + queue.getPlayersEachTeam())).complete().getId();
         vc1ID = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "1")).setUserlimit(queue.getPlayersEachTeam()).complete().getId();
         vc2ID = vcsCategory.createVoiceChannel(Config.getValue("game-vc-names").replaceAll("%number%", number + "").replaceAll("%mode%", queue.getPlayersEachTeam() + "v" +queue.getPlayersEachTeam()).replaceAll("%team%", "2")).setUserlimit(queue.getPlayersEachTeam()).complete().getId();
+
+        //
+        // DETERMINE CAPTAINS
+        //
 
         Collections.shuffle(players);
         this.remainingPlayers = new ArrayList<>(players);
@@ -100,25 +112,33 @@ public class Game {
             this.team1.add(captain1);
             this.team2.add(captain2);
 
+            this.remainingPlayers.remove(captain1);
+            this.remainingPlayers.remove(captain2);
+
             try {
                 guild.moveVoiceMember(guild.getMemberById(captain1.getID()), guild.getVoiceChannelById(vc1ID)).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
                 guild.moveVoiceMember(guild.getMemberById(captain2.getID()), guild.getVoiceChannelById(vc2ID)).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
             } catch (Exception ignored) {}
-
-            this.remainingPlayers.remove(captain1);
-            this.remainingPlayers.remove(captain2);
         }
 
-        for (Player p : players) {
-            guild.getTextChannelById(channelID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).queue();
-            guild.getVoiceChannelById(vc1ID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
-            guild.getVoiceChannelById(vc2ID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
-        }
+        try {
+            for (Player p : players) {
+                guild.getTextChannelById(channelID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).queue();
+                guild.getVoiceChannelById(vc1ID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
+                guild.getVoiceChannelById(vc2ID).createPermissionOverride(guild.getMemberById(p.getID())).setAllow(Permission.VIEW_CHANNEL).setAllow(Permission.VOICE_CONNECT).queue();
+            }
 
-        for (Player p : remainingPlayers) {
-            try {
+            for (Player p : remainingPlayers) {
                 guild.moveVoiceMember(guild.getMemberById(p.getID()), guild.getVoiceChannelById(vc1ID)).queue(null, new ErrorHandler().ignore(ErrorResponse.USER_NOT_CONNECTED));
-            } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            String mentions = "";
+            for (Player p : players) {
+                mentions+="<@" + p.getID() + ">";
+            }
+            Embed embed = new Embed(EmbedType.ERROR, "Something went wrong...", "The game couldn't be created because something went wrong. Please rejoin the queue to try again. If this keeps happening contact the staff", 1);
+            guild.getTextChannelById(Config.getValue("alerts-channel")).sendMessage(mentions).setEmbeds(embed.build()).queue();
         }
 
         GameCache.initializeGame(this);
@@ -395,8 +415,10 @@ public class Game {
 
             double eloMultiplier = Double.parseDouble(Config.getValue("solo-multiplier"));
             if (queue.getPickingMode() == PickingMode.AUTOMATIC) {
-                if (playersInParties.containsKey(p)) {
-                    eloMultiplier = Double.parseDouble(Config.getValue("party-multiplier-" + playersInParties.get(p)));
+                if (playersInParties != null) {
+                    if (playersInParties.containsKey(p)) {
+                        eloMultiplier = Double.parseDouble(Config.getValue("party-multiplier-" + playersInParties.get(p)));
+                    }
                 }
             }
 

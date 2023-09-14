@@ -127,8 +127,13 @@ public class Player {
         }
 
         if (member != null) {
-            guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
-            member.modifyNickname(Config.getValue("elo-formatting").replaceAll("%elo%", elo + "") + ign).queue();
+            if (RankedBot.guild.getSelfMember().canInteract(member)) {
+                guild.modifyMemberRoles(member, rolestoadd, rolestoremove).queue();
+                member.modifyNickname(Config.getValue("elo-formatting").replaceAll("%elo%", elo + "") + ign).queue();
+            }
+            else {
+                System.out.println("[RBW] Couldn't modify " + member.getUser().getAsTag() + "'s roles and nickname");
+            }
         }
     }
 
