@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -95,9 +96,14 @@ public class StatsCmd extends Command {
 
                     BufferedImage image = ImageIO.read(new File("RankedBot/themes/" + player.getTheme().getName() + ".png").toURI().toURL());
 
+                    URL url = new URL(skinlink);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                    connection.setRequestProperty("User-Agent", "RankedBot/1.0 (+https://github.com/SSRequest/RankedBot)");
+
                     BufferedImage skin;
                     try {
-                        skin = ImageIO.read(new URL(skinlink));
+                        skin = ImageIO.read(connection.getInputStream());
                     } catch (Exception e) {
                         Embed embed = new Embed(EmbedType.ERROR, "Something went wrong...", "Please try executing this command again", 1);
                         msg.replyEmbeds(embed.build()).queue();
